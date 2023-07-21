@@ -1,0 +1,7 @@
+boto3 <=1.15.18
+gluonnlp ==0.10.0
+mxnet == 1.7.0.post2
+onnxruntime==0.5.0
+sentencepiece ==0.1.96
+torch ==1.10.1
+transformers ==3.0.2

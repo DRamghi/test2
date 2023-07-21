@@ -30,6 +30,7 @@ st.set_page_config(
     layout="wide",
 )
 #######################################################
+
 file_path = "C:\\github\\test2\\full_result.csv"
 @st.cache_data
 def load_data():

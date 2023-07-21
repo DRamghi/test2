@@ -28,7 +28,7 @@ joblib==1.2.0
 JPype1==1.1.2
 jsonschema==4.17.3
 kiwisolver==1.4.4
-kobert @ git+https://github.com/SKTBrain/KoBERT/tree/master
+kobert @ git+https://github.com/SKTBrain/KoBERT
 konlpy==0.6.0
 lxml==4.9.2
 markdown-it-py==2.2.0

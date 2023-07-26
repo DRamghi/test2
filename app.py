@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 import plotly.express as px
 
 from konlpy.tag import Mecab
-mecab = Mecab(dicpath='C:/mecab/mecab-ko-dic')
+mecab = Mecab()
 
 import re
 
@@ -23,163 +23,21 @@ from collections import Counter
 
 import plotly.graph_objects as go
 
-
-############ KoBert 모델 구현을 위한 환경설정 ###########
-import torch
-from torch import nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
-import gluonnlp as nlp
-import numpy as np
-from tqdm import tqdm, tqdm_notebook
-
-#kobert
-from kobert.utils import get_tokenizer
-from kobert.pytorch_kobert import get_pytorch_kobert_model
-
-#transformers
-from transformers import AdamW
-from transformers.optimization import get_cosine_schedule_with_warmup
-
-#device = torch.device("cuda:0")
-device = torch.device('cpu')
-
-
 ##########################################
 #페이지 기본설정
 st.set_page_config(
     page_title="지면기사 분석",
     layout="wide",
 )
-
-###########################################
-
-search_word = "0"
-start_date = "0"
-end_date = "0"
-
-
-# with st.sidebar:
-#     st.markdown("<h1 style='text-align: center; color: black;'>키워드를 입력하세요</h1>", unsafe_allow_html=True)
-#     input1 = st.text_input(label="키워드", placeholder="대한민국")
-#     #input2 = st.text_input(label="시작일자", placeholder="2022-11-03")
-#     #input3 = st.text_input(label="종료일자", placeholder="2022-11-04")
-#     input2 = st.date_input(label="시작일자")
-#     input3 = st.date_input(label="종료일자")
-#     col5, col6, col7 = st.columns(3)
-#     with col5:
-#         pass
-#     with col6:
-#         button = st.button("입력")
-#     with col7:
-#         pass
-
-with st.sidebar:
-    choice = option_menu("지면기사 분석", ["오늘의 주요 보도", "키워드 검색"],
-                         icons=['house', 'kanban'],
-                         menu_icon="app-indicator", default_index=0,
-                         styles={
-        "container": {"padding": "4!important", "background-color": "#fafafa"},
-        "icon": {"color": "black", "font-size": "25px"},
-        "nav-link": {"font-size": "16px", "text-align": "left", "margin":"0px", "--hover-color": "#fafafa"},
-        "nav-link-selected": {"background-color": "#08c7b4"},
-    }
-    )
-
-
 #######################################################
-file_path = "C:\\github\\test2\\full_result.csv"
+
+file_path = "full_result.csv"
 @st.cache_data
 def load_data():
   data = pd.read_csv(file_path)
   return data
 
-
-
-####################################################################
-# BERT 모델, Vocabulary 불러오기
-bertmodel, vocab = get_pytorch_kobert_model()
-
-
-# BERT 모델에 들어가기 위한 dataset을 만들어주는 클래스
-class BERTDataset(Dataset):
-    def __init__(self, dataset, sent_idx, label_idx, bert_tokenizer, max_len,
-                 pad, pair):
-        transform = nlp.data.BERTSentenceTransform(
-            bert_tokenizer, max_seq_length=max_len, pad=pad, pair=pair)
-
-        self.sentences = [transform([i[sent_idx]]) for i in dataset]
-        self.labels = [np.int32(i[label_idx]) for i in dataset]
-
-    def __getitem__(self, i):
-        return (self.sentences[i] + (self.labels[i],))
-
-    def __len__(self):
-        return (len(self.labels))
-
-
-# Setting parameters
-max_len = 64
-batch_size = 64
-warmup_ratio = 0.1
-num_epochs = 5
-max_grad_norm = 1
-log_interval = 200
-learning_rate = 5e-5
-
-tokenizer = get_tokenizer()
-tok = nlp.data.BERTSPTokenizer(tokenizer, vocab, lower=False)
-
-
-class BERTClassifier(nn.Module):
-    def __init__(self,
-                 bert,
-                 hidden_size=768,
-                 num_classes=3,  ##클래스 수 조정##
-                 dr_rate=None,
-                 params=None):
-        super(BERTClassifier, self).__init__()
-        self.bert = bert
-        self.dr_rate = dr_rate
-
-        self.classifier = nn.Linear(hidden_size, num_classes)
-        if dr_rate:
-            self.dropout = nn.Dropout(p=dr_rate)
-
-    def gen_attention_mask(self, token_ids, valid_length):
-        attention_mask = torch.zeros_like(token_ids)
-        for i, v in enumerate(valid_length):
-            attention_mask[i][:v] = 1
-        return attention_mask.float()
-
-    def forward(self, token_ids, valid_length, segment_ids):
-        attention_mask = self.gen_attention_mask(token_ids, valid_length)
-
-        _, pooler = self.bert(input_ids=token_ids, token_type_ids=segment_ids.long(),
-                              attention_mask=attention_mask.float().to(token_ids.device))
-        if self.dr_rate:
-            out = self.dropout(pooler)
-        return self.classifier(out)
-
-
-@st.cache_data
-def load_model():
-    model = BERTClassifier(bertmodel, dr_rate=0.5).to(device)
-    model.load_state_dict(
-        torch.load('C:\\github\\project3\\main\\model_state_dict.pt', map_location=device), strict=False)
-    return model
-
-model = load_model()
-
-
-###################################################################
-if button:
-    search_word = input1
-    start_date = str(input2)
-    end_date = str(input3)
-
-#################################################################
+#################################################################.
 
 data = load_data()
 data['Date'] = data['Date'].astype('str')
@@ -187,333 +45,179 @@ data['Date'] = pd.to_datetime(data['Date'])
 data.reset_index(drop=True, inplace=True)
 del data['Unnamed: 0']
 
-if search_word and start_date and end_date != "0":
-    start_date = datetime.strptime(start_date, '%Y-%m-%d')
-    end_date = datetime.strptime(end_date, '%Y-%m-%d')
+###################오늘 날짜 받아오기
+now = datetime.now()
+date = now.date()
+date = str(date)
+date = datetime.strptime(date, '%Y-%m-%d')
+####################
 
-    ########## 특정 키워드 빈도수 ##################
+def same_word(sentence):
+    st = sentence
+    st = re.sub('기재부', '기획재정부', st)
+    st = re.sub('과기부', '과학기술정보통신부', st)
+    st = re.sub('과기정통부', '과학기술정보통신부', st)
+    st = re.sub('행안부', '행정안전부', st)
+    st = re.sub('문체부', '문화체육관광부', st)
+    st = re.sub('농식품부', '농림축산식품부', st)
+    st = re.sub('산업부', '산업통상자원부', st)
+    st = re.sub('산자부', '산업통상자원부', st)
+    st = re.sub('고용부', '고용노동부', st)
+    st = re.sub('여가부', '여성가족부', st)
+    st = re.sub('국토부', '국토교통부', st)
+    st = re.sub('해수부', '해양수산부', st)
+    st = re.sub('중기부', '중소벤처기업부', st)
+    st = re.sub('중기벤처부', '중소벤처기업부', st)
+    st = re.sub('인사처', '인사혁신처', st)
+    st = re.sub('인혁처', '인사혁신처', st)
+    st = re.sub('식약처', '식품의약품안전처', st)
+    st = re.sub('공정위', '공정거래위원회', st)
+    st = re.sub('개인정보위', '개인정보보호위원회', st)
+    st = re.sub('개보위', '개인정보보호위원회', st)
+    st = re.sub('원안위', '원자력안전위원회', st)
+    st = re.sub('국조실', '국무조정실', st)
+    st = re.sub('국무총리실', '국무조정실', st)
+    st = re.sub('대통령실', '대통령비서실', st)
+    return st
 
-    date_data = data[data['Date'].between(start_date, end_date)]  #####대상기간 내 기사 본문 추출
 
-    # 특정 키워드 기사 index 추출(제목에 포함 or 본문에 3번 이상 포함)
-    target_index_list = []
-    for i in range(0, len(date_data)):
-        title_i = date_data.iloc[i, 2]
-        if title_i.count(search_word) > 0:
-            target_index_list.append(i)
+def date_keyword_search(search_word, start_date, end_date): #날짜는 2022-11-10 형식으로 입력
+  #키워드 입력
+  #대상기간 내 기사 본문 추출
+  date_data = data[data['Date'].between(start_date, end_date)]
 
-    result_list = date_data.iloc[target_index_list]
+  #특정 키워드 기사 index 추출(제목에 포함 or 본문에 3번 이상 포함)
+  title_link_list = []
+  press_list = []
+  for i in range(0, len(date_data)):
+    press = date_data.iloc[i, 0]
+    link = date_data.iloc[i, 1]
+    title = date_data.iloc[i,2]
+    title_re = same_word(title)
+    body = date_data.iloc[i,4]
+    body_re = same_word(body)
+    if title_re.count(search_word)>0 or body_re.count(search_word) >2:
+        title_link = f'''<a href="{link}">{title} ({press})</a>'''
+        title_link_list.append(title_link)
 
-    full_date_list = pd.date_range(start=start_date, end=end_date)
-    date_list = set(result_list['Date'])
-    date_list = list(date_list)
-    date_list.sort(reverse=False)
+  search_time = len(title_link_list)
+  search_result = pd.DataFrame({'기사 제목': title_link_list})
+  search_result.index = search_result.index + 1
 
-    target_date_list = []
-    count = []
-    for i in full_date_list:
-        if i in date_list:
-            a = result_list[result_list['Date'] == i]  # 특정 일자의 기사 불러오기
-            b = a['Title'].tolist()
-            b = ' '.join(b)
-            count.append(b.count(search_word))
-            target_date_list.append(i)
+  fig = go.Figure(
+      data=[
+          go.Table(
+              columnwidth=[3, 1],
+              header=dict(
+                  values=[f"<b>{i}</b>" for i in search_result.columns.to_list()],
+                  # fill_color='blue'
+              ),
+              cells=dict(
+                  values=search_result.transpose(),
+                  align="left"
+              )
+          )
+      ]
+  )
+  fig.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
+
+  return search_time, fig
+
+today = "2023-07-22"
+
+#today = datetime.now()
+#today = now.strftime('%Y-%m-%d')
+
+
+president_number, president = date_keyword_search("대통령비서실", today, today)
+prime_number, prime = date_keyword_search("총리", today, today)
+opm_number, opm = date_keyword_search("국무조정실", today, today)
+moef_number, moef = date_keyword_search("기획재정부", today, today)
+moe_number, moe = date_keyword_search("교육부", today, today)
+msit_number, msit = date_keyword_search("과학기술정보통신부", today, today)
+mofa_number, mofa = date_keyword_search("외교부", today, today)
+unikorea_number, unikorea = date_keyword_search("통일부", today, today)
+moj_number, moj = date_keyword_search("법무부", today, today)
+mnd_number, mnd = date_keyword_search("국방부", today, today)
+mois_number, mois = date_keyword_search("행정안전부", today, today)
+mcst_number, mcst = date_keyword_search("문화체육관광부", today, today)
+mafra_number, mafra = date_keyword_search("농림축산식품부", today, today)
+motie_number, motie = date_keyword_search("산업통상자원부", today, today)
+mohw_number, mohw = date_keyword_search("보건복지부", today, today)
+me_number, me = date_keyword_search("환경부", today, today)
+moel_number, moel = date_keyword_search("고용노동부", today, today)
+mogef_number, mogef = date_keyword_search("여성가족부", today, today)
+molit_number, molit = date_keyword_search("국토교통부", today, today)
+mof_number, mof = date_keyword_search("해양수산부", today, today)
+mss_number, mss = date_keyword_search("중소벤처기업부", today, today)
+mpva_number, mpva = date_keyword_search("국가보훈부", today, today)
+ftc_number, ftc = date_keyword_search("공정거래위원회", today, today)
+fsc_number, fsc = date_keyword_search("금융위원회", today, today)
+acrc_number, acrc = date_keyword_search("국민권익위원회", today, today)
+pipc_number, pipc = date_keyword_search("개인정보보호위원회", today, today)
+nssc_number, nssc = date_keyword_search("원자력안전위원회", today, today)
+kcc_number, kcc = date_keyword_search("방송통신위원회", today, today)
+mpm_number, mpm = date_keyword_search("인사혁신처", today, today)
+moleg_number, moleg = date_keyword_search("법제처", today, today)
+mfds_number, mfds = date_keyword_search("식품의약품안전처", today, today)
+
+
+
+name_list = ["대통령비서실", "국무총리", "국무조정실", "기획재정부", "교육부", "과학기술정보통신부", "외교부", "통일부", "법무부", "국방부",
+             "행정안전부", "문화체육관광부", "농림축산식품부", "산업통상자원부", "보건복지부", "환경부", "고용노동부", "여성가족부",
+             "국토교퉁부", "해양수산부", "중소벤처기업부", "국가보훈부", "공정거래위원회", "금융위원회", "국민권익위원회", "개인정보보호위원회",
+             "원자력안전위원회", "방송통신위원회", "인사혁신처", "법제처", "식품의약품안전처"]
+name_list_chart = ["국조실", "기재부", "교육부", "과기부", "외교부", "통일부", "법무부", "국방부",
+                   "행안부", "문체부", "농식품부", "산업부", "복지부", "환경부", "고용부", "여가부",
+                   "국토부", "해수부", "중기부", "보훈부", "공정위", "금융위", "권익위", "개보위", "원안위", "방통위", "인사처", "법제처", "식약처"]
+number_list = [president_number, prime_number, opm_number, moef_number, moe_number, msit_number, mofa_number, unikorea_number,
+               moj_number, mnd_number, mois_number, mcst_number, mafra_number, motie_number, mohw_number, me_number,
+               moel_number, mogef_number, molit_number, mof_number, mss_number, mpva_number, ftc_number, fsc_number, acrc_number,
+               pipc_number, nssc_number, kcc_number, mpm_number, moleg_number, mfds_number]
+number_list_chart = [opm_number, moef_number, moe_number, msit_number, mofa_number, unikorea_number,
+               moj_number, mnd_number, mois_number, mcst_number, mafra_number, motie_number, mohw_number, me_number,
+               moel_number, mogef_number, molit_number, mof_number, mss_number, mpva_number, ftc_number, fsc_number, acrc_number,
+               pipc_number, nssc_number, kcc_number, mpm_number, moleg_number, mfds_number]
+department_list = [president, prime, opm, moef, moe, msit, mofa, unikorea,
+               moj, mnd, mois, mcst, mafra, motie, mohw, me,
+               moel, mogef, molit, mof, mss, mpva, ftc, fsc, acrc, pipc, nssc, kcc, mpm, moleg, mfds]
+
+
+chart_table = pd.DataFrame([name_list_chart, number_list_chart])
+chart_table.rename(columns=chart_table.iloc[0], inplace=True)
+chart_table.index = ['name', 'count']
+chart_table = chart_table.transpose()
+chart_table.drop(chart_table[chart_table['count']==0].index, inplace=True)
+
+bar_chart = go.Bar(x=chart_table['name'], y=chart_table['count'])
+fig9 = go.Figure(data=bar_chart)
+fig9.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
+
+
+########################################################################
+
+with st.container():
+    st.subheader("기관별 보도량")
+    #st.bar_chart(name_number, use_container_width=True)
+    st.plotly_chart(fig9, use_container_width=True)
+    st.markdown("""---""")
+
+with st.container():
+    st.subheader("기관별 주요보도")
+
+
+col1, col2 = st.columns(2)
+n = 1
+for name, number, department in zip(name_list, number_list, department_list):
+    if number > 0 :
+        n = n + 1
+        if n % 2 == 0:
+            with col1:
+                with st.container():
+                    with st.expander(f"{name} : {number}건"):
+                        st.plotly_chart(department, use_container_width=True)
         else:
-            count.append(0)
-            target_date_list.append(i)
-
-    d = pd.DataFrame([target_date_list, count])
-    if len(target_date_list) < 10:
-        width = 5
-    elif len(target_date_list) < 20:
-        width = 10
-    else:
-        width = 15
-
-    d = d.transpose()  # 행 열 전환
-    d.rename(columns={0: "date"}, inplace=True)
-    d.rename(columns={1: "count"}, inplace=True)
-
-
-    fig1 = px.line(d, x="date", y="count")
-
-
-
-
-
-    ##########불용어 사전#########################
-    stop_words = "이번 담당 여러분 관련 이날 이후 오후 오전 경우 기간 때문 관계자 최근 기준 설명 연합뉴스 예정 증가 가운데 상당 가량 추진 아마 대략 방침 현지시간"
-    stop_words = set(stop_words.split(' '))
-
-
-    #########특정 키워드 연관어 분석################
-
-    date_list = set(result_list['Date'])
-    date_list = list(date_list)
-    date_list.sort(reverse=False)
-    period = end_date - start_date + timedelta(days=1)
-    period = period.days
-
-    keywords_table = pd.DataFrame()
-    total_word_list = []
-    a = []
-
-    n = int(period / 7) + 1
-    for i in range(0, int(period / n)):
-        start_day = start_date + timedelta(days=n * i)
-        str_start_day = str(start_day)[5:10].replace('-', '.') + " ~"
-        end_day = start_date + timedelta(days=n * (i + 1) - 1)
-        str_end_day = str(end_day)[5:10].replace('-', '.')
-
-        date_result = result_list[
-            result_list['Date'].between(start_day, end_day)]
-
-        text = '\n'.join(date_result['Body'])
-        lines = text.split(".")
-
-        # 명사 추출
-        words_list = []
-        for line in lines:
-            if search_word in line:
-                nouns = mecab.nouns(line)
-                for noun in nouns:
-                    if len(noun) > 1 and noun not in stop_words and noun != search_word:
-                        words_list.append(noun)  # 한 문장에서 명사들만 추출(일자별)
-                        total_word_list.append(noun)  # 한 문장에서 명사들만 추출(전 기간)
-
-        c = Counter(words_list)
-
-        top_related_words = dict(c.most_common(10))
-        if str_start_day == str_end_day:
-            first_column = str_end_day
-        else: first_column = f'{str_start_day}~{str_end_day}'
-
-        date_top_related_words = pd.DataFrame(list(top_related_words.items()), columns=[first_column, "second"])
-        for i in range(0,10):
-            date_top_related_words.iloc[i,0] = f'{date_top_related_words.iloc[i,0]}  :  {date_top_related_words.iloc[i,1]}건'
-        date_top_related_words.drop(labels='second', axis=1, inplace=True)
-        date_top_related_words.index = date_top_related_words.index + 1
-        keywords_table = pd.concat([keywords_table, date_top_related_words], axis=1, join='outer')
-
-    if period % n == 0:
-        pass
-    else:
-        plus_day = start_date + timedelta(days=(n * (i + 1)))
-        str_plus_day = str(plus_day)[5:10].replace('-', '.') + " ~"
-        plus_alpha_day = start_date + timedelta(days=(n * (i + 1)) + period % n -1)
-        str_plus_alpha_day = str(plus_alpha_day)[5:10].replace('-', '.')
-        date_result = result_list[result_list['Date'].between(plus_day, plus_alpha_day)]
-
-        text = '\n'.join(date_result['Body'])
-        lines = text.split(".")
-
-        # 명사 추출
-        words_list = []
-        for line in lines:
-            if search_word in line:
-                nouns = mecab.nouns(line)
-                for noun in nouns:
-                    if len(noun) > 1 and noun not in stop_words and noun != search_word:
-                        words_list.append(noun)  # 한 문장에서 명사들만 추출(일자별)
-                        total_word_list.append(noun)  # 한 문장에서 명사들만 추출(전 기간)
-
-        c = Counter(words_list)
-
-        top_related_words = dict(c.most_common(10))
-
-        if str_plus_day == str_plus_alpha_day:
-            last_column = str_plus_alpha_day
-        else:
-            last_column = f'{str_plus_day}~{str_plus_alpha_day}'
-
-        #date_top_related_words = pd.DataFrame(list(top_related_words.items()),
-        #                                      columns=[str_plus_day, str_plus_alpha_day])
-        #date_top_related_words.index = date_top_related_words.index + 1
-        #keywords_table = pd.concat([keywords_table, date_top_related_words], axis=1, join='outer')
-
-
-
-
-        date_top_related_words = pd.DataFrame(list(top_related_words.items()), columns=[last_column, "second"])
-        for i in range(0, 10):
-            date_top_related_words.iloc[
-                i, 0] = f'{date_top_related_words.iloc[i, 0]}  :  {date_top_related_words.iloc[i, 1]}건'
-        date_top_related_words.drop(labels='second', axis=1, inplace=True)
-        date_top_related_words.index = date_top_related_words.index + 1
-        keywords_table = pd.concat([keywords_table, date_top_related_words], axis=1, join='outer')
-
-
-
-    c = Counter(total_word_list)
-    top_related_words = dict(c.most_common(50))
-    wc = WordCloud(background_color='white', font_path='C:\\github\\project2\\main\\NanumGothic.ttf')
-    wc.generate_from_frequencies(top_related_words)
-    figure = plt.figure(figsize=(width, 5))
-    plt.imshow(wc, interpolation='bilinear')
-    plt.axis('off')
-    plt.show()
-    plt.close(figure)
-
-    ###################기사 긍정,부정 분석#####################
-
-    def predict(predict_sentence):
-
-        data = [predict_sentence, '0']
-        dataset_another = [data]
-
-        another_test = BERTDataset(dataset_another, 0, 1, tok, max_len, True, False)
-        test_dataloader = torch.utils.data.DataLoader(another_test, batch_size=batch_size,
-                                                      num_workers=0)  # 원래 num_workers=5였음
-
-        model.eval()
-
-        for batch_id, (token_ids, valid_length, segment_ids, label) in enumerate(test_dataloader):
-            token_ids = token_ids.long().to(device)
-            segment_ids = segment_ids.long().to(device)
-
-            valid_length = valid_length
-            label = label.long().to(device)
-
-            out = model(token_ids, valid_length, segment_ids)
-
-            test_eval = []
-            for i in out:
-                logits = i
-                logits = logits.detach().cpu().numpy()
-
-                if np.argmax(logits) == 0:
-                    test_eval.append("부정")
-                elif np.argmax(logits) == 1:
-                    test_eval.append("중립")
-                elif np.argmax(logits) == 2:
-                    test_eval.append("긍정")
-
-            return test_eval[0]
-
-
-    import re
-
-    pos_list = []
-    pos_press_list=[]
-    pos_link_list=[]
-    neg_list = []
-    neg_press_list = []
-    neg_link_list = []
-    neu_list = []
-    neu_press_list = []
-    neu_link_list = []
-
-    for i in range(0, len(result_list)):
-        title = result_list.iloc[i, 2]
-        press = result_list.iloc[i, 0]
-        link = result_list.iloc[i, 1]
-        title_link = f'''<a href="{link}">{title}</a>'''
-        title_score = predict(title)
-        if title_score == "긍정":
-            pos_list.append(title_link)
-            pos_press_list.append(press)
-        elif title_score == "부정":
-            neg_list.append(title_link)
-            neg_press_list.append(press)
-        else:
-            neu_list.append(title_link)
-            neu_press_list.append(press)
-
-    pos_time = len(pos_list)
-    neg_time = len(neg_list)
-    neu_time = len(neu_list)
-    net_time = pos_time + neg_time + neu_time
-
-    pos_table = pd.DataFrame({'제목': pos_list, '언론사' : pos_press_list})
-    pos_table.index = pos_table.index + 1
-
-
-
-    neg_table = pd.DataFrame({'제목': neg_list, '언론사': neg_press_list})
-    neg_table.index = neg_table.index + 1
-
-    neu_table = pd.DataFrame({'제목' : neu_list, '언론사' : neu_press_list})
-    neu_table.index = neu_table.index + 1
-
-
-    #############################
-
-    fig2 = go.Figure(
-        data=[
-            go.Table(
-                columnwidth=[3, 1],
-                header=dict(
-                    values=[f"<b>{i}</b>" for i in pos_table.columns.to_list()],
-                    #fill_color='blue'
-                ),
-                cells=dict(
-                    values=pos_table.transpose(),
-                    align="left"
-                )
-            )
-        ]
-    )
-    fig2.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
-
-    fig3 = go.Figure(
-        data=[
-            go.Table(
-                columnwidth=[3, 1],
-                header=dict(
-                    values=[f"<b>{i}</b>" for i in neg_table.columns.to_list()],
-                    #fill_color='blue'
-                ),
-                cells=dict(
-                    values=neg_table.transpose(),
-                    align="left"
-                )
-            )
-        ]
-    )
-    fig3.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
-
-    fig4 = go.Figure(
-        data=[
-            go.Table(
-                columnwidth=[3, 1],
-                header=dict(
-                    values=[f"<b>{i}</b>" for i in neu_table.columns.to_list()],
-                    # fill_color='blue'
-                ),
-                cells=dict(
-                    values=neu_table.transpose(),
-                    align="left"
-                )
-            )
-        ]
-    )
-    fig4.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
-
-    #######################################################################
-
-    with st.container():
-        with st.container():
-            st.subheader("1.일자별 언급량")
-            st.plotly_chart(fig1, use_container_width=True)
-        st.markdown("""---""")
-        with st.container():
-            st.subheader("2.기간별 연관검색어")
-            st.dataframe(keywords_table, use_container_width=True)
-        st.markdown("""---""")
-        with st.container():
-            st.subheader("3.Word Cloud")
-            st.pyplot(figure)
-        st.markdown("""---""")
-        with st.container():
-            st.subheader(f"4.긍정보도 : {net_time}건 중 {pos_time}건")
-            st.plotly_chart(fig2, use_container_width=True)
-        st.markdown("""---""")
-        with st.container():
-            st.subheader(f"5.부정보도 : {net_time}건 중 {neg_time}건")
-            st.plotly_chart(fig3, use_container_width=True)
-        st.markdown("""---""")
-        with st.container():
-            st.subheader(f"6.중립보도 : {net_time}건 중 {neu_time}건")
-            st.plotly_chart(fig4, use_container_width=True)
-
-
+            with col2:
+                with st.container():
+                    with st.expander(f"{name} : {number}건"):
+                        st.plotly_chart(department, use_container_width=True)

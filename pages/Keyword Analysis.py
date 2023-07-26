@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import plotly.express as px
 
 from konlpy.tag import Mecab
-mecab = Mecab(dicpath='C:/mecab/mecab-ko-dic')
+mecab = Mecab()
 
 import re
 
@@ -78,7 +78,7 @@ with st.container():
 
 
 #######################################################
-file_path = "C:\\github\\test2\\full_result.csv"
+file_path = "full_result.csv"
 @st.cache_data
 def load_data():
   data = pd.read_csv(file_path)

@@ -46,13 +46,6 @@ data.reset_index(drop=True, inplace=True)
 del data['Unnamed: 0']
 
 
-###################오늘 날짜 받아오기
-#now = datetime.now()
-#date = now.date()
-#date = str(date)
-#date = datetime.strptime(date, '%Y-%m-%d')
-####################
-
 def same_word(sentence):
     st = sentence
     st = re.sub('기재부', '기획재정부', st)
@@ -124,10 +117,10 @@ def date_keyword_search(search_word, start_date, end_date): #날짜는 2022-11-1
 
   return search_time, fig
 
-today = "2023-07-18"
 
-#today = datetime.now()
-#today = now.strftime('%Y-%m-%d')
+
+now = datetime.now(timezone('Asia/Seoul'))
+today = str(now.date())
 
 
 president_number, president = date_keyword_search("대통령비서실", today, today)
@@ -196,6 +189,10 @@ fig9.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
 
 
 ########################################################################
+
+with st.container():
+    st.subheader(f"{today}")
+    st.subheader("")
 
 with st.container():
     st.subheader("기관별 보도량")

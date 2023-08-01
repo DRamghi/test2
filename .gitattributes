@@ -1,1 +1,2 @@
 model_state_dict.pt filter=lfs diff=lfs merge=lfs -text
+*full_result.csv filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,41 @@
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.31.37.193:8501
+  External URL: http://3.37.158.200:8501
+
+2023-08-07 20:33:49.025 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 123, in <module>
+    st.dataframe(keywords_table, use_container_width=True)
+NameError: name 'keywords_table' is not defined
+2023-08-07 20:42:28.652 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 236, in <module>
+    st.table(keywords_table, use_container_width=True)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/metrics_util.py", line 356, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+TypeError: table() got an unexpected keyword argument 'use_container_width'
+2023-08-07 22:09:00.775 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 236, in <module>
+    surge_table = surge_table[((surge_table.iloc[:,-1]>5)) & ((surge_table.iloc[:,-1]>surge_table.mean(axis='columns')*2) & (surge_table.iloc[:,-1]>surge_table.iloc[:,-2]))]
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/metrics_util.py", line 356, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+TypeError: table() got an unexpected keyword argument 'use_container_width'
+2023-08-07 22:14:37.191 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 237, in <module>
+    surge_table = surge_table[((surge_table.iloc[:,1]==NaN)) & ((surge_table.iloc[:,2]==NaN) & (surge_table.iloc[:,-1]>surge_table.iloc[:,-2]))]
+NameError: name 'NaN' is not defined

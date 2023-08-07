@@ -29,13 +29,13 @@ search_word = "0"
 start_date = "0"
 end_date = "0"
 
-
 with st.container():
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         input1 = st.text_input(label="키워드", placeholder="대한민국")
     with col2:
         input2 = st.date_input(label="시작일자")
+        st.text("*2023년 7월 3일부터 검색 가능")
     with col3:
         input3 = st.date_input(label="종료일자")
     with col4:
@@ -117,6 +117,9 @@ if search_word and start_date and end_date != "0":
     stop_words = set(stop_words.split(' '))
 
 
+
+
+
     #########특정 키워드 연관어 분석################
 
     result_list = date_data.loc[index_list]
@@ -160,13 +163,13 @@ if search_word and start_date and end_date != "0":
 
                 c = Counter(words_list)
 
-                top_related_words = dict(c.most_common(10))
+                top_related_words = dict(c.most_common(15))
                 if str_start_day == str_end_day:
                     first_column = str_end_day
                 else: first_column = f'{str_start_day}~{str_end_day}'
 
                 date_top_related_words = pd.DataFrame(list(top_related_words.items()), columns=[first_column, "second"])
-                for d in range(0,10):
+                for d in range(0,15):
                     date_top_related_words.iloc[d,0] = f'{date_top_related_words.iloc[d,0]}  :  {date_top_related_words.iloc[d,1]}건'
                 date_top_related_words.drop(labels='second', axis=1, inplace=True)
                 date_top_related_words.index = date_top_related_words.index + 1
@@ -199,7 +202,7 @@ if search_word and start_date and end_date != "0":
 
             c = Counter(words_list)
 
-            top_related_words = dict(c.most_common(10))
+            top_related_words = dict(c.most_common(15))
 
             if str_plus_day == str_plus_alpha_day:
                 last_column = str_plus_alpha_day
@@ -232,6 +235,8 @@ if search_word and start_date and end_date != "0":
         st.subheader("2.기간별 연관검색어")
         st.dataframe(keywords_table, use_container_width=True)
     st.markdown("""---""")
+
+
     with st.container():
         st.subheader("3.Word Cloud")
         st.pyplot(figure)

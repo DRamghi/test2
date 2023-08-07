@@ -26,8 +26,8 @@ del data['Unnamed: 0']
 #today = str(now.date())
 #previous_day = now - timedelta(days=30)
 #previous_day = str(previous_day)[:-22]
-today = "2023-07-31"
-previous_day = "2023-07-13"
+today = "2023-08-05"
+previous_day = "2023-08-03"
 
 
 #최근 1달간 DB 추출
@@ -63,42 +63,42 @@ keywords = keywords.drop(0, axis=1)
 #빈도수가 급증한 키워드 추출
 a = keywords[((keywords.iloc[:,-1]>20)) & ((keywords.iloc[:,-1]>keywords.mean(axis='columns')*4) & (keywords.iloc[:,-1]>keywords.iloc[:,-2]))]
 b = a.sort_values(by=[keywords.columns[-1]],ascending=False)
-
+print(b)
 
 #각 키워드별 연관검색어 추출 -> 데이터프레임에 병합
-top_words = b[0:50]
-today_data=data[data['Date']==today]
-related_words_table = []
-title_table = []
-url_table = []
-for n in range(0,50):
-  print(n)
-  search_word = b.index[n]
-  text = []
-  title_link_list = []
-  for i in range(0, len(today_data)):
-    title_i = today_data.iloc[i,2]
-    body_i = today_data.iloc[i,4]
-    url_i = today_data.iloc[i,1]
-    title_link_i = f'''<a href="{url_i}">{title_i})</a>'''
-    if title_i.count(search_word)>0 or body_i.count(search_word) >2:
-      text.append(body_i)
-      title_link_list.append(title_link_i)
-  text = ' '.join(text)
-  related_words = tagger.nouns(text)
-  related_words = [item for item in related_words if len(item)>1 and item != search_word]
-  related_words_count = Counter(related_words)
-  related_words_count = dict(related_words_count.most_common(7)).keys()
-  related_words_table.append(related_words_count)
-  title_table.append(title_link_list)
+# top_words = b[0:50]
+# today_data=data[data['Date']==today]
+# related_words_table = []
+# title_table = []
+# url_table = []
+# for n in range(0,50):
+#   print(n)
+#   search_word = b.index[n]
+#   text = []
+#   title_link_list = []
+#   for i in range(0, len(today_data)):
+#     title_i = today_data.iloc[i,2]
+#     body_i = today_data.iloc[i,4]
+#     url_i = today_data.iloc[i,1]
+#     title_link_i = f'''<a href="{url_i}">{title_i})</a>'''
+#     if title_i.count(search_word)>0 or body_i.count(search_word) >2:
+#       text.append(body_i)
+#       title_link_list.append(title_link_i)
+#   text = ' '.join(text)
+#   related_words = tagger.nouns(text)
+#   related_words = [item for item in related_words if len(item)>1 and item != search_word]
+#   related_words_count = Counter(related_words)
+#   related_words_count = dict(related_words_count.most_common(7)).keys()
+#   related_words_table.append(related_words_count)
+#   title_table.append(title_link_list)
 
-title_table = pd.Series(title_table)
-title_table.name = "title_list"
-title_table.index = top_words.index
-related_words_table = pd.Series(related_words_table)
-related_words_table.index = top_words.index
-related_words_table.name = "연관어"
-related_words_table
-full_table = pd.concat([top_words, related_words_table, title_table], axis=1)
-full_table.to_csv("/issue.csv")
+# title_table = pd.Series(title_table)
+# title_table.name = "title_list"
+# title_table.index = top_words.index
+# related_words_table = pd.Series(related_words_table)
+# related_words_table.index = top_words.index
+# related_words_table.name = "연관어"
+# related_words_table
+# full_table = pd.concat([top_words, related_words_table, title_table], axis=1)
+# full_table.to_csv("/issue.csv")
 

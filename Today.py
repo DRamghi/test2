@@ -122,8 +122,9 @@ def date_keyword_search(search_word, start_date, end_date): #날짜는 2022-11-1
 
 now = datetime.now(timezone('Asia/Seoul'))
 today = str(now.date())
-
-
+today_re = re.sub('-', '', today)
+if len(data[data['Date']==today_re]) == 0:
+    message = "아직 오늘 기사가 업데이트되지 않았습니다. 기사는 매일 아침 8시경 업데이트됩니다."
 
 president_number, president = date_keyword_search("대통령비서실", today, today)
 prime_number, prime = date_keyword_search("총리", today, today)
@@ -195,7 +196,8 @@ fig9.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
 ########################################################################
 
 with st.container():
-    st.subheader(f"{today}")
+    st.subheader(f"{today} 주요 보도")
+    st.text(message)
     st.subheader("")
 
 with st.container():

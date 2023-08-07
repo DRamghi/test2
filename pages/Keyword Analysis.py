@@ -218,7 +218,7 @@ if search_word and start_date and end_date != "0":
 
     c = Counter(total_word_list)
     top_related_words = dict(c.most_common(50))
-    wc = WordCloud(background_color='white', font_path='C:\\github\\project2\\main\\NanumGothic.ttf')
+    wc = WordCloud(background_color='white', font_path='NanumGothic.ttf')
     wc.generate_from_frequencies(top_related_words)
     figure = plt.figure(figsize= (5, 5))
     plt.imshow(wc, interpolation='bilinear')

@@ -22,6 +22,7 @@ import re
 from collections import Counter
 
 import plotly.graph_objects as go
+from pytz import timezone
 
 ##########################################
 #페이지 기본설정
@@ -123,6 +124,7 @@ now = datetime.now(timezone('Asia/Seoul'))
 today = str(now.date())
 
 
+
 president_number, president = date_keyword_search("대통령비서실", today, today)
 prime_number, prime = date_keyword_search("총리", today, today)
 opm_number, opm = date_keyword_search("국무조정실", today, today)
@@ -164,11 +166,13 @@ name_list = ["대통령비서실", "국무총리", "국무조정실", "기획재
 name_list_chart = ["국조실", "기재부", "교육부", "과기부", "외교부", "통일부", "법무부", "국방부",
                    "행안부", "문체부", "농식품부", "산업부", "복지부", "환경부", "고용부", "여가부",
                    "국토부", "해수부", "중기부", "보훈부", "공정위", "금융위", "권익위", "개보위", "원안위", "방통위", "인사처", "법제처", "식약처"]
-number_list = [president_number, prime_number, opm_number, moef_number, moe_number, msit_number, mofa_number, unikorea_number,
+
+number_list_chart = [opm_number, moef_number, moe_number, msit_number, mofa_number, unikorea_number,
                moj_number, mnd_number, mois_number, mcst_number, mafra_number, motie_number, mohw_number, me_number,
                moel_number, mogef_number, molit_number, mof_number, mss_number, mpva_number, ftc_number, fsc_number, acrc_number,
                pipc_number, nssc_number, kcc_number, mpm_number, moleg_number, mfds_number]
-number_list_chart = [opm_number, moef_number, moe_number, msit_number, mofa_number, unikorea_number,
+
+number_list = [president_number, prime_number, opm_number, moef_number, moe_number, msit_number, mofa_number, unikorea_number,
                moj_number, mnd_number, mois_number, mcst_number, mafra_number, motie_number, mohw_number, me_number,
                moel_number, mogef_number, molit_number, mof_number, mss_number, mpva_number, ftc_number, fsc_number, acrc_number,
                pipc_number, nssc_number, kcc_number, mpm_number, moleg_number, mfds_number]

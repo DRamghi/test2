@@ -32,7 +32,7 @@ st.set_page_config(
 )
 #######################################################
 
-file_path = "full_result.csv"
+file_path = "/home/ubuntu/test2/full_result.csv"
 @st.cache_data
 def load_data():
   data = pd.read_csv(file_path)
@@ -41,8 +41,8 @@ def load_data():
 #################################################################.
 
 data = load_data()
-data['Date'] = data['Date'].astype('str')
-data['Date'] = pd.to_datetime(data['Date'])
+#data['Date'] = data['Date'].astype('str')
+#data['Date'] = pd.to_datetime(data['Date'])
 data.reset_index(drop=True, inplace=True)
 del data['Unnamed: 0']
 
@@ -76,10 +76,10 @@ def same_word(sentence):
     return st
 
 
-def date_keyword_search(search_word, start_date, end_date): #날짜는 2022-11-10 형식으로 입력
+def date_keyword_search(search_word, today): #날짜는 2022-11-10 형식으로 입력
   #키워드 입력
   #대상기간 내 기사 본문 추출
-  date_data = data[data['Date'].between(start_date, end_date)]
+  date_data = data[data['Date']==today]
 
   #특정 키워드 기사 index 추출(제목에 포함 or 본문에 3번 이상 포함)
   title_link_list = []
@@ -121,42 +121,50 @@ def date_keyword_search(search_word, start_date, end_date): #날짜는 2022-11-1
 
 
 now = datetime.now(timezone('Asia/Seoul'))
-today = str(now.date())
-today_re = re.sub('-', '', today)
-if len(data[data['Date']==today_re]) == 0:
-    message = "아직 오늘 기사가 업데이트되지 않았습니다. 기사는 매일 아침 8시경 업데이트됩니다."
+today2 = str(now.date())
+today = re.sub('-', '', today2)
+today = int(today)
+if len(data[data['Date']==today]) == 0:
+    message = "아직 오늘 보도가 업데이트되지 않아 전일 보도를 제공합니다. 보도는 매일 아침 8시경 업데이트됩니다."
+    today2 = now - timedelta(days=1)
+    today2 = str(today2.date())
+    today = re.sub('-','',today2)
+    today = int(today)
+else:
+    message =""
 
-president_number, president = date_keyword_search("대통령비서실", today, today)
-prime_number, prime = date_keyword_search("총리", today, today)
-opm_number, opm = date_keyword_search("국무조정실", today, today)
-moef_number, moef = date_keyword_search("기획재정부", today, today)
-moe_number, moe = date_keyword_search("교육부", today, today)
-msit_number, msit = date_keyword_search("과학기술정보통신부", today, today)
-mofa_number, mofa = date_keyword_search("외교부", today, today)
-unikorea_number, unikorea = date_keyword_search("통일부", today, today)
-moj_number, moj = date_keyword_search("법무부", today, today)
-mnd_number, mnd = date_keyword_search("국방부", today, today)
-mois_number, mois = date_keyword_search("행정안전부", today, today)
-mcst_number, mcst = date_keyword_search("문화체육관광부", today, today)
-mafra_number, mafra = date_keyword_search("농림축산식품부", today, today)
-motie_number, motie = date_keyword_search("산업통상자원부", today, today)
-mohw_number, mohw = date_keyword_search("보건복지부", today, today)
-me_number, me = date_keyword_search("환경부", today, today)
-moel_number, moel = date_keyword_search("고용노동부", today, today)
-mogef_number, mogef = date_keyword_search("여성가족부", today, today)
-molit_number, molit = date_keyword_search("국토교통부", today, today)
-mof_number, mof = date_keyword_search("해양수산부", today, today)
-mss_number, mss = date_keyword_search("중소벤처기업부", today, today)
-mpva_number, mpva = date_keyword_search("국가보훈부", today, today)
-ftc_number, ftc = date_keyword_search("공정거래위원회", today, today)
-fsc_number, fsc = date_keyword_search("금융위원회", today, today)
-acrc_number, acrc = date_keyword_search("국민권익위원회", today, today)
-pipc_number, pipc = date_keyword_search("개인정보보호위원회", today, today)
-nssc_number, nssc = date_keyword_search("원자력안전위원회", today, today)
-kcc_number, kcc = date_keyword_search("방송통신위원회", today, today)
-mpm_number, mpm = date_keyword_search("인사혁신처", today, today)
-moleg_number, moleg = date_keyword_search("법제처", today, today)
-mfds_number, mfds = date_keyword_search("식품의약품안전처", today, today)
+
+president_number, president = date_keyword_search("대통령비서실", today)
+prime_number, prime = date_keyword_search("총리", today)
+opm_number, opm = date_keyword_search("국무조정실", today)
+moef_number, moef = date_keyword_search("기획재정부", today)
+moe_number, moe = date_keyword_search("교육부", today)
+msit_number, msit = date_keyword_search("과학기술정보통신부", today)
+mofa_number, mofa = date_keyword_search("외교부", today)
+unikorea_number, unikorea = date_keyword_search("통일부", today)
+moj_number, moj = date_keyword_search("법무부", today)
+mnd_number, mnd = date_keyword_search("국방부", today)
+mois_number, mois = date_keyword_search("행정안전부", today)
+mcst_number, mcst = date_keyword_search("문화체육관광부", today)
+mafra_number, mafra = date_keyword_search("농림축산식품부", today)
+motie_number, motie = date_keyword_search("산업통상자원부", today)
+mohw_number, mohw = date_keyword_search("보건복지부", today)
+me_number, me = date_keyword_search("환경부", today)
+moel_number, moel = date_keyword_search("고용노동부", today)
+mogef_number, mogef = date_keyword_search("여성가족부", today)
+molit_number, molit = date_keyword_search("국토교통부", today)
+mof_number, mof = date_keyword_search("해양수산부", today)
+mss_number, mss = date_keyword_search("중소벤처기업부", today)
+mpva_number, mpva = date_keyword_search("국가보훈부", today)
+ftc_number, ftc = date_keyword_search("공정거래위원회", today)
+fsc_number, fsc = date_keyword_search("금융위원회", today)
+acrc_number, acrc = date_keyword_search("국민권익위원회", today)
+pipc_number, pipc = date_keyword_search("개인정보보호위원회", today)
+nssc_number, nssc = date_keyword_search("원자력안전위원회", today)
+kcc_number, kcc = date_keyword_search("방송통신위원회", today)
+mpm_number, mpm = date_keyword_search("인사혁신처", today)
+moleg_number, moleg = date_keyword_search("법제처", today)
+mfds_number, mfds = date_keyword_search("식품의약품안전처", today)
 
 
 
@@ -196,7 +204,7 @@ fig9.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
 ########################################################################
 
 with st.container():
-    st.subheader(f"{today} 주요 보도")
+    st.subheader(f"{today2} 주요 보도")
     st.text(message)
     st.subheader("")
 

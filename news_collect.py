@@ -17,11 +17,11 @@ from functools import wraps
 ua = UserAgent()
 
 
-# now = datetime.now(timezone('Asia/Seoul'))
-# date = now.date()
-# date = str(date)
-# target_date = re.sub('-', '', date)
-target_date = "20230802"
+now = datetime.now(timezone('Asia/Seoul'))
+date = now.date()
+date = str(date)
+target_date = re.sub('-', '', date)
+
 
 press_numbers = ['032', '005', '020', '021', '081', '022', '023', '025', '028', '469', '009', '011', '366', '015']
 press_list = []
@@ -44,7 +44,7 @@ def parser(link):
         press_list.append(press)
         date_list.append(target_date)
 
-        bodies = bs.find('div', {'id': 'dic_area'})
+        bodies = bs.find('article', {'id': 'dic_area'})
         if bodies == None:
             bodies == ""
         else :

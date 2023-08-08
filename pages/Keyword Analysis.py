@@ -211,7 +211,7 @@ if search_word and start_date and end_date != "0":
 
             date_top_related_words = pd.DataFrame(list(top_related_words.items()), columns=[last_column, "second"])
 
-            for i in range(0, 10):
+            for i in range(0, 15):
                 date_top_related_words.iloc[i, 0] = f'{date_top_related_words.iloc[i, 0]}  :  {date_top_related_words.iloc[i, 1]}건'
             date_top_related_words.drop(labels='second', axis=1, inplace=True)
             date_top_related_words.index = date_top_related_words.index + 1

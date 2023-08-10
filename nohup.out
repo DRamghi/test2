@@ -666,3 +666,94 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to Fals
   Network URL: http://172.31.37.193:8501
   External URL: http://3.37.158.200:8501
 
+using cached model. /home/ubuntu/test2/.cache/kobert_v1.zip
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_v1.zip
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.31.37.193:8501
+  External URL: http://3.37.158.200:8501
+
+2023-08-09 12:43:44.416 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 225, in <module>
+    wc.generate_from_frequencies(top_related_words)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/wordcloud/wordcloud.py", line 410, in generate_from_frequencies
+    raise ValueError("We need at least 1 word to plot a word cloud, "
+ValueError: We need at least 1 word to plot a word cloud, got 0.
+2023-08-09 12:45:08.934 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 173, in <module>
+    date_top_related_words.iloc[d,0] = f'{date_top_related_words.iloc[d,0]}  :  {date_top_related_words.iloc[d,1]}건'
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/core/indexing.py", line 1096, in __getitem__
+    return self.obj._get_value(*key, takeable=self._takeable)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/core/frame.py", line 3868, in _get_value
+    return series._values[index]
+IndexError: index 5 is out of bounds for axis 0 with size 5
+2023-08-09 12:45:47.875 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 173, in <module>
+    date_top_related_words.iloc[d,0] = f'{date_top_related_words.iloc[d,0]}  :  {date_top_related_words.iloc[d,1]}건'
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/core/indexing.py", line 1096, in __getitem__
+    return self.obj._get_value(*key, takeable=self._takeable)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/core/frame.py", line 3868, in _get_value
+    return series._values[index]
+IndexError: index 12 is out of bounds for axis 0 with size 12
+2023-08-09 12:46:01.392 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 173, in <module>
+    date_top_related_words.iloc[d,0] = f'{date_top_related_words.iloc[d,0]}  :  {date_top_related_words.iloc[d,1]}건'
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/core/indexing.py", line 1096, in __getitem__
+    return self.obj._get_value(*key, takeable=self._takeable)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/core/frame.py", line 3868, in _get_value
+    return series._values[index]
+IndexError: index 5 is out of bounds for axis 0 with size 5
+2023-08-09 12:46:42.105 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/transformers/modeling_utils.py", line 1211, in from_pretrained
+    state_dict = torch.load(resolved_archive_file, map_location="cpu")
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/torch/serialization.py", line 608, in load
+    return _legacy_load(opened_file, map_location, pickle_module, **pickle_load_args)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/torch/serialization.py", line 794, in _legacy_load
+    deserialized_objects[key]._set_from_file(f, offset, f_should_read_directly)
+RuntimeError: unexpected EOF, expected 8 more bytes. The file might be corrupted.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 276, in <module>
+    bertmodel, vocab = get_pytorch_kobert_model()
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/kobert/pytorch_kobert.py", line 52, in get_pytorch_kobert_model
+    return get_kobert_model(model_path, vocab_path, ctx)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/kobert/pytorch_kobert.py", line 27, in get_kobert_model
+    bertmodel = BertModel.from_pretrained(model_path, return_dict=False)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/transformers/modeling_utils.py", line 1213, in from_pretrained
+    raise OSError(
+OSError: Unable to load weights from pytorch checkpoint file for '.cache/kobert_from_pretrained' at '.cache/kobert_from_pretrained/pytorch_model.bin'If you tried to load a PyTorch model from a TF 2.0 checkpoint, please set from_tf=True. 
+2023-08-10 08:50:53.024 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 225, in <module>
+    wc.generate_from_frequencies(top_related_words)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/wordcloud/wordcloud.py", line 410, in generate_from_frequencies
+    raise ValueError("We need at least 1 word to plot a word cloud, "
+ValueError: We need at least 1 word to plot a word cloud, got 0.

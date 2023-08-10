@@ -91,7 +91,7 @@ class BERTClassifier(nn.Module):
         return self.classifier(out)
 
 
-@st.cache_data
+#@st.cache_data
 def load_model():
     model = BERTClassifier(bertmodel, dr_rate=0.5).to(device)
     model.load_state_dict(

@@ -45,7 +45,7 @@ with st.container():
 
 
 #######################################################
-file_path = "full_result.csv"
+file_path = "test2/full_result.csv" 
 @st.cache_data
 def load_data():
   data = pd.read_csv(file_path)
@@ -60,6 +60,7 @@ data['Date'] = pd.to_datetime(data['Date'])
 data.reset_index(drop=True, inplace=True)
 del data['Unnamed: 0']
 
+days = ['월', '화', '수', '목', '금', '토', '일']
 
 ###################################################################
 if button:
@@ -81,33 +82,61 @@ if search_word and start_date and end_date != "0":
 
 
     # 특정 키워드 기사 index 추출(제목에 포함 or 본문에 1번 이상 포함)
+    # 검색날짜 범위 중 일요일을 제외한 날짜 리스트 만들기
     full_date_list = pd.date_range(start=start_date, end=end_date)
+    week_day_list = []
+    for i in full_date_list:
+        if days[datetime.date(i).weekday()] != "일":
+            week_day_list.append(i)
+    full_date_list = week_day_list
 
     count_list = []
+    table = pd.DataFrame()
     index_list = []
     date_list = []
     for i in full_date_list:
         a = date_data[date_data['Date'] == i]
         count = 0
+        pos_count = 0
+        neg_count = 0
+        neu_count = 0
         for j in range(0, len(a)):
             title_j = a.iloc[j, 2]
             body_j = a.iloc[j, 4]
-            if title_j.count(search_word) > 0 or body_j.count(search_word) > 0:
-                count = count + title_j.count(search_word) + body_j.count(search_word)
+            if title_j.count(search_word) > 0 or body_j.count(search_word) > 2:
+                count = count + 1
                 index_list.append(a.index[j])
                 if date_list.count(i) == 0:
                     date_list.append(i)
+                if a.iloc[j,5] == "긍정":
+                    pos_count = pos_count + 1
+                elif a.iloc[j,5] == "부정":
+                    neg_count = neg_count + 1
+                else:
+                    neu_count = neu_count + 1
         count_list.append(count)
-    d = pd.DataFrame([full_date_list, count_list])
-    d = d.transpose()  # 행 열 전환
-    d.rename(columns={0: "date"}, inplace=True)
-    d.rename(columns={1: "count"}, inplace=True)
+        new = {'날짜' : [i, i, i], '논조' : ['긍정', '중립', '부정'], '보도건수' : [pos_count, neu_count, neg_count]}
+        new = pd.DataFrame(data=new)
+        table = pd.concat([table, new])
 
-    fig1 = px.line(d, x="date", y="count")
+    d = table
+    #d = pd.DataFrame([full_date_list, count_list, pos_count_list, neu_count_list, neg_count_list])
+    #d = d.transpose()  # 행 열 전환
+    #d.rename(columns={0: "날짜"}, inplace=True)
+    #d.rename(columns={1: "언급량"}, inplace=True)
+
+    fig1 = px.line(d, x="날짜", y="보도건수", color="논조", height=400, render_mode='svg')
+    #fig1 = px.line(d, x="날짜", y="언급량", color="논조", height=400, render_mode='svg')
     fig1.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
+    fig1.update_xaxes(
+        rangebreaks=[
+            dict(bounds=["sun", "mon"]) #hide weekends
+        ]
+    )
+    
 
     with st.container():
-        st.subheader("1.일자별 언급량")
+        st.subheader("1.일자별 보도건수")
         st.plotly_chart(fig1, use_container_width=True)
     st.markdown("""---""")
 
@@ -220,218 +249,112 @@ if search_word and start_date and end_date != "0":
 
 
     c = Counter(total_word_list)
-    top_related_words = dict(c.most_common(50))
-    wc = WordCloud(background_color='white', font_path='NanumGothic.ttf')
-    wc.generate_from_frequencies(top_related_words)
-    figure = plt.figure(figsize= (5, 5))
-    plt.imshow(wc, interpolation='bilinear')
-    plt.axis('off')
-    plt.show()
-    plt.close(figure)
+    if len(c) < 30:
+        pass
+    else :
+        word_cloud_message = ""
+        top_related_words = dict(c.most_common(50))
+        wc = WordCloud(background_color='white', font_path='NanumGothic.ttf')
+        wc.generate_from_frequencies(top_related_words)
+        figure = plt.figure(figsize= (5, 5))
+        plt.imshow(wc, interpolation='bilinear')
+        plt.axis('off')
+        plt.show()
+        plt.close(figure)
 
     #######################################################################
 
     with st.container():
         st.subheader("2.기간별 연관검색어")
-        st.dataframe(keywords_table, use_container_width=True)
+        st.dataframe(keywords_table, use_container_width=True, height = 600)
     st.markdown("""---""")
 
 
     with st.container():
         st.subheader("3.Word Cloud")
-        st.pyplot(figure)
+        if len(c) < 30:
+            st.write("관련 검색어가 적어 워드클라우드를 생성하지 않습니다")
+        else:
+            st.pyplot(figure)
     st.markdown("""---""")
 
 
-
-
-    ############ KoBert 모델 구현을 위한 환경설정 ###########
-    import torch
-    from torch import nn
-    import torch.nn.functional as F
-    import torch.optim as optim
-    from torch.utils.data import Dataset, DataLoader
-    import gluonnlp as nlp
-    import numpy as np
-    from tqdm import tqdm, tqdm_notebook
-
-    import sys
-    sys.path.append("/home/ubuntu/KoBERT")
-
-    #kobert
-    from kobert.utils import get_tokenizer
-    from kobert.pytorch_kobert import get_pytorch_kobert_model
-
-    #transformers
-    from transformers import AdamW
-    from transformers.optimization import get_cosine_schedule_with_warmup
-
-    #device = torch.device("cuda:0")
-    device = torch.device('cpu')
-
-
-    ################################
-
-    # BERT 모델, Vocabulary 불러오기
-    bertmodel, vocab = get_pytorch_kobert_model()
-
-
-    # BERT 모델에 들어가기 위한 dataset을 만들어주는 클래스
-    class BERTDataset(Dataset):
-        def __init__(self, dataset, sent_idx, label_idx, bert_tokenizer, max_len,
-                    pad, pair):
-            transform = nlp.data.BERTSentenceTransform(
-                bert_tokenizer, max_seq_length=max_len, pad=pad, pair=pair)
-
-            self.sentences = [transform([i[sent_idx]]) for i in dataset]
-            self.labels = [np.int32(i[label_idx]) for i in dataset]
-
-        def __getitem__(self, i):
-            return (self.sentences[i] + (self.labels[i],))
-
-        def __len__(self):
-            return (len(self.labels))
-
-
-    # Setting parameters
-    max_len = 64
-    batch_size = 64
-    warmup_ratio = 0.1
-    num_epochs = 5
-    max_grad_norm = 1
-    log_interval = 200
-    learning_rate = 5e-5
-
-    tokenizer = get_tokenizer()
-    tok = nlp.data.BERTSPTokenizer(tokenizer, vocab, lower=False)
-
-
-    class BERTClassifier(nn.Module):
-        def __init__(self,
-                    bert,
-                    hidden_size=768,
-                    num_classes=3,  ##클래스 수 조정##
-                    dr_rate=None,
-                    params=None):
-            super(BERTClassifier, self).__init__()
-            self.bert = bert
-            self.dr_rate = dr_rate
-
-            self.classifier = nn.Linear(hidden_size, num_classes)
-            if dr_rate:
-                self.dropout = nn.Dropout(p=dr_rate)
-
-        def gen_attention_mask(self, token_ids, valid_length):
-            attention_mask = torch.zeros_like(token_ids)
-            for i, v in enumerate(valid_length):
-                attention_mask[i][:v] = 1
-            return attention_mask.float()
-
-        def forward(self, token_ids, valid_length, segment_ids):
-            attention_mask = self.gen_attention_mask(token_ids, valid_length)
-
-            _, pooler = self.bert(input_ids=token_ids, token_type_ids=segment_ids.long(),
-                                attention_mask=attention_mask.float().to(token_ids.device))
-            if self.dr_rate:
-                out = self.dropout(pooler)
-            return self.classifier(out)
-
-
-    #@st.cache_data
-    def load_model():
-        model = BERTClassifier(bertmodel, dr_rate=0.5).to(device)
-        model.load_state_dict(
-            torch.load("model_state_dict.pt", map_location=device), strict=False)
-        return model
-
-    model = load_model()
-
-
-###############
-
     ###################기사 긍정,부정 분석#####################
-
-    def predict(predict_sentence):
-
-        data = [predict_sentence, '0']
-        dataset_another = [data]
-
-        another_test = BERTDataset(dataset_another, 0, 1, tok, max_len, True, False)
-        test_dataloader = torch.utils.data.DataLoader(another_test, batch_size=batch_size,
-                                                      num_workers=0)  # 원래 num_workers=5였음
-
-        model.eval()
-
-        for batch_id, (token_ids, valid_length, segment_ids, label) in enumerate(test_dataloader):
-            token_ids = token_ids.long().to(device)
-            segment_ids = segment_ids.long().to(device)
-
-            valid_length = valid_length
-            label = label.long().to(device)
-
-            out = model(token_ids, valid_length, segment_ids)
-
-            test_eval = []
-            for i in out:
-                logits = i
-                logits = logits.detach().cpu().numpy()
-
-                if np.argmax(logits) == 0:
-                    test_eval.append("부정")
-                elif np.argmax(logits) == 1:
-                    test_eval.append("중립")
-                elif np.argmax(logits) == 2:
-                    test_eval.append("긍정")
-
-            return test_eval[0]
-
 
     import re
 
     pos_list = []
     pos_press_list=[]
+    pos_date_list = []
     pos_link_list=[]
     neg_list = []
     neg_press_list = []
+    neg_date_list = []
     neg_link_list = []
     neu_list = []
     neu_press_list = []
+    neu_date_list = []
     neu_link_list = []
 
     for i in range(0, len(result_list)):
         title = result_list.iloc[i, 2]
-        press = result_list.iloc[i, 0]
+        date = str(result_list.iloc[i, 3])[:-8]
         link = result_list.iloc[i, 1]
-        title_link = f'''<a href="{link}">{title}</a>'''
-        title_score = predict(title)
+        press = result_list.iloc[i, 0]
+        title_link = f'''<a href="{link}">{title} ({press})</a>'''
+        title_score = result_list.iloc[i,5]   
         if title_score == "긍정":
             pos_list.append(title_link)
-            pos_press_list.append(press)
+            pos_date_list.append(date)
         elif title_score == "부정":
             neg_list.append(title_link)
-            neg_press_list.append(press)
+            neg_date_list.append(date)
         else:
             neu_list.append(title_link)
-            neu_press_list.append(press)
+            neu_date_list.append(date)
 
     pos_time = len(pos_list)
     neg_time = len(neg_list)
     neu_time = len(neu_list)
     net_time = pos_time + neg_time + neu_time
 
-    pos_table = pd.DataFrame({'제목': pos_list, '언론사' : pos_press_list})
+    pos_table = pd.DataFrame({'제목': pos_list, '날짜' : pos_date_list})
+    pos_table = pos_table.sort_values(by=['날짜'])
     pos_table.index = pos_table.index + 1
 
 
-
-    neg_table = pd.DataFrame({'제목': neg_list, '언론사': neg_press_list})
+    neg_table = pd.DataFrame({'제목': neg_list, '날짜' : neg_date_list})
+    neg_table = neg_table.sort_values(by=['날짜'])
     neg_table.index = neg_table.index + 1
 
-    neu_table = pd.DataFrame({'제목' : neu_list, '언론사' : neu_press_list})
+    neu_table = pd.DataFrame({'제목': neu_list, '날짜' : neu_date_list})
+    neu_table = neu_table.sort_values(by=['날짜'])
     neu_table.index = neu_table.index + 1
 
 
     #############################
+
+    # if len(pos_table) == 0:
+    #     height_pos = 10
+    # elif len(pos_table) < 3:
+    #     height_pos = len(pos_table) * 70
+    # else:
+    #     height_pos = len(pos_table) * 50
+
+    # if len(neu_table) == 0:
+    #     height_neu = 10
+    # elif len(neu_table) < 3:
+    #     height_neu = len(neu_table) * 70
+    # else:
+    #     height_neu = len(neu_table) * 50
+
+    # if len(neg_table) == 0:
+    #     height_neg = 10
+    # elif len(neg_table) < 3:
+    #     height_neg = len(neg_table) * 70
+    # else:
+    #     height_neg = len(neg_table) * 50
+
 
     fig2 = go.Figure(
         data=[
@@ -486,13 +409,13 @@ if search_word and start_date and end_date != "0":
 #########################
 
     with st.container():
-        st.subheader(f"4.긍정보도 : {net_time}건 중 {pos_time}건")
+        st.write(f"4.긍정보도 : {net_time}건 중 {pos_time}건")
         st.plotly_chart(fig2, use_container_width=True)
     st.markdown("""---""")
     with st.container():
-        st.subheader(f"5.부정보도 : {net_time}건 중 {neg_time}건")
+        st.write(f"5.부정보도 : {net_time}건 중 {neg_time}건")
         st.plotly_chart(fig3, use_container_width=True)
     st.markdown("""---""")
     with st.container():
-        st.subheader(f"6.중립보도 : {net_time}건 중 {neu_time}건")
+        st.write(f"6.중립보도 : {net_time}건 중 {neu_time}건")
         st.plotly_chart(fig4, use_container_width=True)

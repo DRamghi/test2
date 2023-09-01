@@ -757,3 +757,63 @@ Traceback (most recent call last):
   File "/home/ubuntu/.local/lib/python3.9/site-packages/wordcloud/wordcloud.py", line 410, in generate_from_frequencies
     raise ValueError("We need at least 1 word to plot a word cloud, "
 ValueError: We need at least 1 word to plot a word cloud, got 0.
+using cached model. /home/ubuntu/test2/.cache/kobert_v1.zip
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_v1.zip
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_v1.zip
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_v1.zip
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_v1.zip
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+using cached model. /home/ubuntu/test2/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.31.37.193:8501
+  External URL: http://3.37.158.200:8501
+
+2023-08-11 10:58:52.937 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/Today.py", line 201, in <module>
+    if len(noun) > 1 and noun not in stop_words and noun != search_word:
+NameError: name 'search_word' is not defined
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.31.37.193:8508
+  External URL: http://3.37.158.200:8508
+
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.31.37.193:8501
+  External URL: http://3.37.158.200:8501
+
+  Stopping...
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.31.37.193:8501
+  External URL: http://3.37.158.200:8501
+
+  Stopping...

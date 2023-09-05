@@ -11,7 +11,12 @@ import random
 import plotly.graph_objects as go
 import plotly.express as px
 
-# mecab = Mecab()
+mecab = Mecab()
+
+line = "후쿠시마 원전 오염수는 안전한가?"
+nouns = mecab.nouns(line)
+print(nouns)
+
 
 # file_path = "/home/ubuntu/test2/full_result.csv"
 # data = pd.read_csv(file_path)
@@ -20,15 +25,15 @@ import plotly.express as px
 
 
 #data = pd.read_csv("/home/ubuntu/test2/today_department_table.csv")
-data = pd.read_csv("/home/ubuntu/test2/full_result.csv")
-del data['Unnamed: 0']
-data['Date'] = data['Date'].astype('str')
-data['Date'] = pd.to_datetime(data['Date'])
+# data = pd.read_csv("/home/ubuntu/test2/full_result.csv")
+# del data['Unnamed: 0']
+# data['Date'] = data['Date'].astype('str')
+# data['Date'] = pd.to_datetime(data['Date'])
 
-print(data.iloc[0, 0])
-print(data.iloc[0, 1])
-print(data.iloc[0, 2])
-print(data.iloc[0, 3])
+# print(data.iloc[0, 0])
+# print(data.iloc[0, 1])
+# print(data.iloc[0, 2])
+# print(data.iloc[0, 3])
 
 #del today_data['Unnamed: 0']
 

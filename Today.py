@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 
 import base64
 import io
-from wordcloud import WordCloud
+
 from datetime import datetime, timedelta
 import plotly.express as px
 
@@ -23,6 +23,8 @@ from collections import Counter
 
 import plotly.graph_objects as go
 from pytz import timezone
+
+from PIL import Image
 
 ##########################################
 #페이지 기본설정
@@ -52,6 +54,8 @@ def department_search(search_word): #날짜는 2022-11-10 형식으로 입력
     if num == 0:
         height1 = 10
     elif num < 3:
+        height1 = num * 75
+    elif num < 6:
         height1 = num * 70
     else:
         height1 = num * 50
@@ -207,6 +211,8 @@ chart_table = chart_table[chart_table['주요보도 건수'] != 0]
 
 fig9 = px.bar(chart_table, x='중앙행정기관', y='주요보도 건수', color='논조', height = 400)
 fig9.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
+fig9.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.35, xanchor='center', x=0.5))
+fig9.update_layout(legend_title_text="")
 
 
 ########################################################################
@@ -216,6 +222,14 @@ with st.container():
     st.text(message1)
     st.text(message2)
     st.subheader("")
+
+
+image = Image.open('/home/ubuntu/test2/wordcloud.png')
+with st.container():
+    st.subheader("오늘의 이슈 키워드")
+    st.image(image)
+    st.subheader("")
+
 
 with st.container():
     st.subheader("기관별 보도량 및 논조")
@@ -228,11 +242,20 @@ with st.container():
 
 
 col1, col2 = st.columns(2)
-n = 1
+
+#최종 테이블 갯수 확인
+leng = 0
+for number in number_list:
+    if number > 0:
+        leng = leng + 1
+
+n = 0
+
 for name, number, departments in zip(name_list_table, number_list, department_list):
     if number > 0 :
         n = n + 1
-        if n % 2 == 0:
+        if n <= leng/2:
+        #if n % 2 == 0:
             with col1:
                 with st.container():
                     with st.expander(f"{name} : {number}건"):
@@ -242,6 +265,10 @@ for name, number, departments in zip(name_list_table, number_list, department_li
                 with st.container():
                     with st.expander(f"{name} : {number}건"):
                         st.plotly_chart(departments, use_container_width=True)
+
+
+    
+
 
 ##오늘의 키워드 워드클라우드
 

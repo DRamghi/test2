@@ -3,6 +3,7 @@ from streamlit_option_menu import option_menu
 
 import pandas as pd
 import numpy as np
+import math
 
 import matplotlib
 from matplotlib import pyplot as plt
@@ -35,7 +36,7 @@ with st.container():
         input1 = st.text_input(label="키워드", placeholder="대한민국")
     with col2:
         input2 = st.date_input(label="시작일자")
-        st.text("*2023년 7월 3일부터 검색 가능")
+        st.text("*2023년 7월 5일부터 검색 가능")
     with col3:
         input3 = st.date_input(label="종료일자")
     with col4:
@@ -120,14 +121,12 @@ if search_word and start_date and end_date != "0":
         table = pd.concat([table, new])
 
     d = table
-    #d = pd.DataFrame([full_date_list, count_list, pos_count_list, neu_count_list, neg_count_list])
-    #d = d.transpose()  # 행 열 전환
-    #d.rename(columns={0: "날짜"}, inplace=True)
-    #d.rename(columns={1: "언급량"}, inplace=True)
 
     fig1 = px.line(d, x="날짜", y="보도건수", color="논조", height=400, render_mode='svg')
     #fig1 = px.line(d, x="날짜", y="언급량", color="논조", height=400, render_mode='svg')
     fig1.update_layout(margin=dict(l=0, r=0, t=0, b=0, pad=0))
+    fig1.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.35, xanchor='center', x=0.5))
+    fig1.update_layout(legend_title_text="")
     fig1.update_xaxes(
         rangebreaks=[
             dict(bounds=["sun", "mon"]) #hide weekends
@@ -142,7 +141,7 @@ if search_word and start_date and end_date != "0":
 
 
     ##########불용어 사전#########################
-    stop_words = "이번 담당 여러분 관련 이날 이후 오후 오전 경우 기간 때문 관계자 최근 기준 설명 연합뉴스 예정 증가 가운데 상당 가량 추진 아마 대략 방침 현지시간"
+    stop_words = "이번 담당 여러분 관련 이날 이달 이후 오후 오전 경우 기간 때문 당시 관계자 최근 기준 설명 연합뉴스 예정 증가 가운데 상당 가량 추진 아마 대략 방침 현지시간 지난달 이유 다음"
     stop_words = set(stop_words.split(' '))
 
 
@@ -159,7 +158,10 @@ if search_word and start_date and end_date != "0":
 
     keywords_table = pd.DataFrame()
     total_word_list = []
-    a = []
+    keyword_count_list = []
+    period_list = []
+    
+    bigram=[]
 
     n = int(period / 7) + 1
     for i in range(0, int(period / n)):
@@ -167,17 +169,18 @@ if search_word and start_date and end_date != "0":
         if start_day > end_date :
             break
         else:
-            str_start_day = str(start_day)[5:10].replace('-', '.') + " ~"
+            str_start_day = str(start_day)[5:10].replace('-', '.')
             end_day = start_date + timedelta(days=n * (i + 1) - 1)
             str_end_day = str(end_day)[5:10].replace('-', '.')
+            period_list.append(int(str(end_day - start_day)[0])+1)
 
-            date_result = result_list[
-                result_list['Date'].between(start_day, end_day)]
+            date_result = result_list[result_list['Date'].between(start_day, end_day)]
 
             if len(date_result) == 0:
                 pass
             else:
                 text = '\n'.join(date_result['Body'])
+                keyword_count_list.append(text.count(search_word))
                 lines = text.split(".")
 
                 # 명사 추출
@@ -190,33 +193,40 @@ if search_word and start_date and end_date != "0":
                                 words_list.append(noun)  # 한 문장에서 명사들만 추출(일자별)
                                 total_word_list.append(noun)  # 한 문장에서 명사들만 추출(전 기간)
 
+                #bigram
+                for j in range(len(words_list)-1):
+                    words_list.append(f"{words_list[j]} {words_list[j+1]}")
+
                 c = Counter(words_list)
 
-                top_related_words = dict(c.most_common(15))
                 if str_start_day == str_end_day:
                     first_column = str_end_day
                 else: first_column = f'{str_start_day}~{str_end_day}'
 
-                date_top_related_words = pd.DataFrame(list(top_related_words.items()), columns=[first_column, "second"])
-                for d in range(0,15):
-                    date_top_related_words.iloc[d,0] = f'{date_top_related_words.iloc[d,0]}  :  {date_top_related_words.iloc[d,1]}건'
-                date_top_related_words.drop(labels='second', axis=1, inplace=True)
-                date_top_related_words.index = date_top_related_words.index + 1
-                keywords_table = pd.concat([keywords_table, date_top_related_words], axis=1, join='outer')
+                date_related_words = pd.DataFrame(list(c.items()))
+                date_related_words.columns = ['keyword',first_column]
+                date_related_words[first_column] = date_related_words[first_column]/(text.count(search_word))/(int(str(end_day - start_day)[0])+1)
+                date_related_words = date_related_words.set_index('keyword')
+
+
+
+                keywords_table = pd.concat([keywords_table, date_related_words], axis=1, join='outer')
 
     if period % n == 0:
         pass
     else:
         plus_day = start_date + timedelta(days=(n * (i + 1)))
-        str_plus_day = str(plus_day)[5:10].replace('-', '.') + " ~"
+        str_plus_day = str(plus_day)[5:10].replace('-', '.')
         plus_alpha_day = start_date + timedelta(days=(n * (i + 1)) + period % n -1)
         str_plus_alpha_day = str(plus_alpha_day)[5:10].replace('-', '.')
         date_result = result_list[result_list['Date'].between(plus_day, plus_alpha_day)]
+        period_list.append(int(str(plus_alpha_day - plus_day)[0])+1)
 
         if len(date_result) == 0:
             pass
         else:
             text = '\n'.join(date_result['Body'])
+            keyword_count_list.append(text.count(search_word))
             lines = text.split(".")
 
             # 명사 추출
@@ -229,54 +239,95 @@ if search_word and start_date and end_date != "0":
                             words_list.append(noun)  # 한 문장에서 명사들만 추출(일자별)
                             total_word_list.append(noun)  # 한 문장에서 명사들만 추출(전 기간)
 
-            c = Counter(words_list)
+            #bigram
+            for j in range(len(words_list)-1):
+                words_list.append(f"{words_list[j]} {words_list[j+1]}")
 
-            top_related_words = dict(c.most_common(15))
+            c = Counter(words_list)
 
             if str_plus_day == str_plus_alpha_day:
                 last_column = str_plus_alpha_day
             else:
                 last_column = f'{str_plus_day}~{str_plus_alpha_day}'
 
-            date_top_related_words = pd.DataFrame(list(top_related_words.items()), columns=[last_column, "second"])
+            date_related_words = pd.DataFrame(list(c.items()))
+            date_related_words.columns = ['keyword',last_column]
+            date_related_words[last_column] = date_related_words[last_column]/(text.count(search_word))/(int(str(plus_alpha_day - plus_day)[0])+1)
+            date_related_words = date_related_words.set_index('keyword')
 
-            for i in range(0, 15):
-                date_top_related_words.iloc[i, 0] = f'{date_top_related_words.iloc[i, 0]}  :  {date_top_related_words.iloc[i, 1]}건'
-            date_top_related_words.drop(labels='second', axis=1, inplace=True)
-            date_top_related_words.index = date_top_related_words.index + 1
-            keywords_table = pd.concat([keywords_table, date_top_related_words], axis=1, join='outer')
+            keywords_table = pd.concat([keywords_table, date_related_words], axis=1, join='outer')
+
+    keywords_table = keywords_table.fillna(0)
+
+    mean_list = list(keywords_table.mean(axis=1))
+
+    most_df = pd.DataFrame()
+    for col in range(0, len(keywords_table.columns)):
+        days_dict = {}
+        days_list = []
+        for i in range(0, len(keywords_table)):
+            if keywords_table.iloc[i,col] != 0:
+            #if std_list[i] > (sum(std_list)/len(std_list)):
+                if keywords_table.iloc[i,col] > mean_list[i]*2:
+                    days_dict[keywords_table.index[i]] = int(keywords_table.iloc[i,col]*period_list[col]*keyword_count_list[col])
+        days_dict = sorted(days_dict.items(), key=lambda x: x[1], reverse=True)
+        days_dict = days_dict[0:30]
+
+        #2개 단어가 있는 경우 1개 단어는 삭제
+        short_list = []
+        for i in range(0,len(days_dict)):
+            for j in range(0,len(days_dict)):
+                if j == i:
+                    pass
+                elif days_dict[i][0] in days_dict[j][0] and days_dict[i][1]/2 < days_dict[j][1] :
+                    short_list.append(days_dict[i])
+                    break
+        for short in short_list:
+            days_dict.remove(short)
 
 
 
-    c = Counter(total_word_list)
-    if len(c) < 30:
-        pass
-    else :
-        word_cloud_message = ""
-        top_related_words = dict(c.most_common(50))
-        wc = WordCloud(background_color='white', font_path='NanumGothic.ttf')
-        wc.generate_from_frequencies(top_related_words)
-        figure = plt.figure(figsize= (5, 5))
-        plt.imshow(wc, interpolation='bilinear')
-        plt.axis('off')
-        plt.show()
-        plt.close(figure)
+        for i in range(0,10):
+            days_list.append(f'{days_dict[i][0]}  :  {days_dict[i][1]}건')
+        
+        days_df = pd.DataFrame(days_list)
+        days_df.columns = [keywords_table.columns[col]]
+        most_df = pd.concat([most_df, days_df], axis=1, join='outer')
+    most_df.index = most_df.index + 1
+
+
+
+
+
+    # c = Counter(total_word_list)
+    # if len(c) < 30:
+    #     pass
+    # else :
+    #     word_cloud_message = ""
+    #     top_related_words = dict(c.most_common(50))
+    #     wc = WordCloud(background_color='white', font_path='NanumGothic.ttf')
+    #     wc.generate_from_frequencies(top_related_words)
+    #     figure = plt.figure(figsize= (5, 5))
+    #     plt.imshow(wc, interpolation='bilinear')
+    #     plt.axis('off')
+    #     plt.show()
+    #     plt.close(figure)
 
     #######################################################################
 
     with st.container():
-        st.subheader("2.기간별 연관검색어")
-        st.dataframe(keywords_table, use_container_width=True, height = 600)
+        st.subheader("2.기간별 연관 이슈 키워드")
+        st.dataframe(most_df, use_container_width=True, height = 400)
     st.markdown("""---""")
 
 
-    with st.container():
-        st.subheader("3.Word Cloud")
-        if len(c) < 30:
-            st.write("관련 검색어가 적어 워드클라우드를 생성하지 않습니다")
-        else:
-            st.pyplot(figure)
-    st.markdown("""---""")
+    # with st.container():
+    #     st.subheader("3.Word Cloud")
+    #     if len(c) < 30:
+    #         st.write("관련 검색어가 적어 워드클라우드를 생성하지 않습니다")
+    #     else:
+    #         st.pyplot(figure)
+    # st.markdown("""---""")
 
 
     ###################기사 긍정,부정 분석#####################
@@ -409,13 +460,13 @@ if search_word and start_date and end_date != "0":
 #########################
 
     with st.container():
-        st.write(f"4.긍정보도 : {net_time}건 중 {pos_time}건")
+        st.subheader(f"4.긍정보도 : {net_time}건 중 {pos_time}건")
         st.plotly_chart(fig2, use_container_width=True)
     st.markdown("""---""")
     with st.container():
-        st.write(f"5.부정보도 : {net_time}건 중 {neg_time}건")
+        st.subheader(f"5.부정보도 : {net_time}건 중 {neg_time}건")
         st.plotly_chart(fig3, use_container_width=True)
     st.markdown("""---""")
     with st.container():
-        st.write(f"6.중립보도 : {net_time}건 중 {neu_time}건")
+        st.subheader(f"6.중립보도 : {net_time}건 중 {neu_time}건")
         st.plotly_chart(fig4, use_container_width=True)

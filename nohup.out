@@ -844,3 +844,37 @@ Collecting usage statistics. To deactivate, set browser.gatherUsageStats to Fals
   Enter the following command to upgrade:
   $ pip install streamlit --upgrade
 
+  Stopping...
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/bin/streamlit", line 5, in <module>
+    from streamlit.web.cli import main
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/__init__.py", line 55, in <module>
+    from streamlit.delta_generator import DeltaGenerator as _DeltaGenerator
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/delta_generator.py", line 36, in <module>
+    from streamlit import config, cursor, env_util, logger, runtime, type_util, util
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/cursor.py", line 18, in <module>
+    from streamlit.runtime.scriptrunner import get_script_run_ctx
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/__init__.py", line 16, in <module>
+    from streamlit.runtime.runtime import Runtime as Runtime
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/runtime.py", line 31, in <module>
+    from streamlit.runtime.app_session import AppSession
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/app_session.py", line 35, in <module>
+    from streamlit.runtime import caching, legacy_caching
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/__init__.py", line 21, in <module>
+    from streamlit.runtime.caching.cache_data_api import (
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_data_api.py", line 32, in <module>
+    from streamlit.runtime.caching.cache_errors import CacheError, CacheKeyNotFoundError
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_errors.py", line 18, in <module>
+    from streamlit import type_util
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/type_util.py", line 42, in <module>
+    from pandas import DataFrame, Index, MultiIndex, Series
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/__init__.py", line 48, in <module>
+    from pandas.core.api import (
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/core/api.py", line 47, in <module>
+    from pandas.core.groupby import (
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/core/groupby/__init__.py", line 1, in <module>
+    from pandas.core.groupby.generic import (
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/core/groupby/generic.py", line 30, in <module>
+    from pandas._libs import (
+  File "<frozen importlib._bootstrap>", line 398, in parent
+KeyboardInterrupt

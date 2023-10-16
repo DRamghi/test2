@@ -27,6 +27,7 @@ weekday = days[datetime.date(now).weekday()]
 
 date = now.date()
 date = str(date)
+
 target_date = re.sub('-', '', date)
 
 
@@ -84,10 +85,10 @@ for i in press_numbers:
         page_url = Press_URL+"&page="+str(page)
         headers = {
         'User-Agent': ua.random,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Referer': 'http://www.naver.com/',
-        'Accept-Encoding': 'gzip, deflate, sdch',
-        'Accept-Language': 'ko-KR,ko;q=0.8,en-US;q=0.6,en;q=0.4',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Referer': Press_URL,
+        'Accept-Encoding': 'gzip, deflate, br', 
+        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5'
         }
         req = requests.get(page_url, headers=headers)
         bs = BeautifulSoup(req.text, 'html.parser')
@@ -110,9 +111,8 @@ for i in press_numbers:
                 if allbreak == True:
                     break
             if allbreak == True:
-                break
-        if allbreak == True:
                 continue
+        
 
         ul_tags = bs.select('ul.type02')
         for ul_tag in ul_tags:
@@ -124,21 +124,22 @@ for i in press_numbers:
                     break    
                 else:
                     links.append(link)
-                if allbreak == True:
-                    break
+                #if allbreak == True 10.7 삭제
+                #    break 10.7 삭제
             if allbreak == True:
                 break
         if allbreak == True:
-            break
+            #break 10.7 삭제
+            continue
 
         #개별 기사 내 제목,날짜,본문 추출
         for link in links:
             headers = {
             'User-Agent': ua.random,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Referer': 'http://www.naver.com/',
-            'Accept-Encoding': 'gzip, deflate, sdch',
-            'Accept-Language': 'ko-KR,ko;q=0.8,en-US;q=0.6,en;q=0.4',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Referer': page_url,
+            'Accept-Encoding': 'gzip, deflate, br', 
+            'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5'
             }
             req = requests.get(link, headers=headers)
             bs = BeautifulSoup(req.text, 'html.parser')
@@ -149,10 +150,10 @@ for i in press_numbers:
                 time.sleep(200)
                 headers = {
                 'User-Agent': ua.random,
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Referer': 'http://www.naver.com/',
-                'Accept-Encoding': 'gzip, deflate, sdch',
-                'Accept-Language': 'ko-KR,ko;q=0.8,en-US;q=0.6,en;q=0.4',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                'Referer': page_url,
+                'Accept-Encoding': 'gzip, deflate, br', 
+                'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5'
                 }
                 req = requests.get(link, headers=headers)
                 bs = BeautifulSoup(req.text, 'html.parser')
@@ -163,10 +164,10 @@ for i in press_numbers:
                     time.sleep(480)
                     headers = {
                     'User-Agent': ua.random,
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                    'Referer': 'http://www.naver.com/',
-                    'Accept-Encoding': 'gzip, deflate, sdch',
-                    'Accept-Language': 'ko-KR,ko;q=0.8,en-US;q=0.6,en;q=0.4',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                    'Referer': page_url,
+                    'Accept-Encoding': 'gzip, deflate, br', 
+                    'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5'
                     }
                     req = requests.get(link, headers=headers)
                     bs = BeautifulSoup(req.text, 'html.parser')
@@ -189,13 +190,11 @@ for i in press_numbers:
     df['Sentiment'] = ''
     
     full_df = pd.concat([full_df, df])
-    full_df.to_csv('/home/ubuntu/test2/full_result.csv')
     
     now = datetime.now(timezone('Asia/Seoul'))
     now = now.strftime('%y-%m-%d %H %M %S')
     print(f"{now} {press} 완료")
     time.sleep(2+random.random()*5)
-df.to_csv('/home/ubuntu/test2/0805result.csv')
 
 full_df = full_df.drop_duplicates(['Body'], keep='first')
 full_df.reset_index(drop=True, inplace=True)

@@ -1,3 +1,5 @@
+#tor를 통한 ip 우회 사용 전
+
 print("hello")
 
 import requests
@@ -13,21 +15,12 @@ from pytz import timezone
 from fake_useragent import UserAgent
 from functools import wraps
 
-now = datetime.now(timezone('Asia/Seoul'))
-now = now.strftime('%y-%m-%d %H %M %S')
-print(f"{now} 시작")
-
 
 previous_df = pd.read_csv('/home/ubuntu/test2/full_result.csv')
 del previous_df["Unnamed: 0"]
 full_df = previous_df
 
 ua = UserAgent()
-
-proxies = {
-    'http' : 'socks5://127.0.0.1:9050',
-    'https' : 'socks5://127.0.0.1:9050'
-}
 
 days = ['월', '화', '수', '목', '금', '토', '일']
 
@@ -40,7 +33,7 @@ date = str(date)
 target_date = re.sub('-', '', date)
 
 
-press_numbers = ['032', '005', '020', '081', '022', '023', '025', '028', '469', '009', '011', '366', '015', '353']
+press_numbers = ['032', '005', '020', '081', '022', '023', '025', '028', '469', '009', '011', '366', '015']
 
 
 
@@ -53,7 +46,7 @@ def parser(link):
     else:
         title_list.append(title)
 
-        press = "경향신문" if i =='032' else "국민일보" if i=="005" else "동아일보" if i=="020" else "서울신문" if i=="081" else "세계일보" if i=="022" else "조선일보" if i=="023" else "조선일보" if i=="366" else "중앙일보" if i=="025" else "중앙일보" if i =='353' else "한겨레" if i=="028" else "한국일보" if i=="469"else "매일경제" if i=="009" else "서울경제" if i=="011" else "한국경제"
+        press = "경향신문" if i =='032' else "국민일보" if i=="005" else "동아일보" if i=="020" else "서울신문" if i=="081" else "세계일보" if i=="022" else "조선일보" if i=="023" else "중앙일보" if i=="025" else "한겨레" if i=="028" else "한국일보" if i=="469"else "매일경제" if i=="009" else "서울경제" if i=="011" else "조선비즈" if i=="366" else "한국경제"
         press_list.append(press)
         date_list.append(date)
 
@@ -67,7 +60,7 @@ def parser(link):
         body_list.append(bodies)
         url_list.append(link)
         weekday_list.append(weekday)
-        #time.sleep(1+random.random()*5)
+        time.sleep(1+random.random()*5)
 
 
 for i in press_numbers:
@@ -78,7 +71,16 @@ for i in press_numbers:
     body_list = []
     weekday_list = []
 
+    #신문사 첫 페이지 정보 읽기
     Press_URL = "https://news.naver.com/main/list.naver?mode=LPOD&mid=sec&oid="+str(i)+"&listType=paper&date="+str(target_date)
+    headers = {'User-Agent': ua.random}
+    req = requests.get(Press_URL, headers=headers)
+    bs = BeautifulSoup(req.text, 'html.parser')
+
+    
+    #특정일 페이지 수 확인
+    #pages = int(len(bs.findAll("a", {"class":"nclicks(cnt_order)"}))/2)
+
 
     for page in tqdm(range(1,9)): #pages+1
         #신문사 내 특정 페이지 호출
@@ -90,7 +92,7 @@ for i in press_numbers:
         'Accept-Encoding': 'gzip, deflate, br', 
         'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5'
         }
-        req = requests.get(page_url, headers=headers, proxies = proxies)
+        req = requests.get(page_url, headers=headers)
         bs = BeautifulSoup(req.text, 'html.parser')
 
         allbreak = False
@@ -132,11 +134,7 @@ for i in press_numbers:
             #break 10.7 삭제
             continue
 
-        press = "경향신문" if i =='032' else "국민일보" if i=="005" else "동아일보" if i=="020" else "서울신문" if i=="081" else "세계일보" if i=="022" else "조선일보" if i=="023" else "조선일보" if i=="366" else "중앙일보" if i=="025" else "중앙일보" if i =='353' else "한겨레" if i=="028" else "한국일보" if i=="469"else "매일경제" if i=="009" else "서울경제" if i=="011" else "한국경제"
-
-        print(f"{press} {page}페이지 기사링크 추출완료")
         #개별 기사 내 제목,날짜,본문 추출
-
         for link in links:
             headers = {
             'User-Agent': ua.random,
@@ -145,7 +143,7 @@ for i in press_numbers:
             'Accept-Encoding': 'gzip, deflate, br', 
             'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5'
             }
-            req = requests.get(link, headers=headers, proxies = proxies)
+            req = requests.get(link, headers=headers)
             bs = BeautifulSoup(req.text, 'html.parser')
             if bs.find('h2') is None:
                 now = datetime.now(timezone('Asia/Seoul'))
@@ -159,7 +157,7 @@ for i in press_numbers:
                 'Accept-Encoding': 'gzip, deflate, br', 
                 'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5'
                 }
-                req = requests.get(link, headers=headers, proxies = proxies)
+                req = requests.get(link, headers=headers)
                 bs = BeautifulSoup(req.text, 'html.parser')
                 if bs.find('h2') is None:
                     now = datetime.now(timezone('Asia/Seoul'))
@@ -173,7 +171,7 @@ for i in press_numbers:
                     'Accept-Encoding': 'gzip, deflate, br', 
                     'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,zh-CN;q=0.6,zh;q=0.5'
                     }
-                    req = requests.get(link, headers=headers, proxies = proxies)
+                    req = requests.get(link, headers=headers)
                     bs = BeautifulSoup(req.text, 'html.parser')
                     parser(link)
                 else:
@@ -182,8 +180,8 @@ for i in press_numbers:
             else:
                 parser(link)
 
-        #time.sleep(1+random.random()*4)
-    press = "경향신문" if i =='032' else "국민일보" if i=="005" else "동아일보" if i=="020" else "서울신문" if i=="081" else "세계일보" if i=="022" else "조선일보" if i=="023" else "조선일보" if i=="366" else "중앙일보" if i=="025" else "중앙일보" if i =='353' else "한겨레" if i=="028" else "한국일보" if i=="469"else "매일경제" if i=="009" else "서울경제" if i=="011" else "한국경제"
+        time.sleep(1+random.random()*4)
+    press = "경향신문" if i =='032' else "국민일보" if i=="005" else "동아일보" if i=="020" else "서울신문" if i=="081" else "세계일보" if i=="022" else "조선일보" if i=="023" else "중앙일보" if i=="025" else "한겨레" if i=="028" else "한국일보" if i=="469"else "매일경제" if i=="009" else "서울경제" if i=="011" else "조선비즈" if i=="366" else "한국경제"
 
     result = {'Press' : press_list, 'Url' : url_list, 'Title':title_list, 'Date':date_list, 'Body':body_list, 'Weekday':weekday_list}
     df=pd.DataFrame(result)
@@ -199,7 +197,7 @@ for i in press_numbers:
     now = datetime.now(timezone('Asia/Seoul'))
     now = now.strftime('%y-%m-%d %H %M %S')
     print(f"{now} {press} 완료")
-    #time.sleep(2+random.random()*5)
+    time.sleep(2+random.random()*5)
 
 full_df = full_df.drop_duplicates(['Body'], keep='first')
 full_df.reset_index(drop=True, inplace=True)

@@ -184,11 +184,11 @@ if len(data[data['Date']==today]) != 0:
   #빈도수가 급증한 키워드 추출
 
   if len(data[data['Date']==today]) > 800 :
-    a = keywords[((keywords.iloc[:,-1]>25)) & ((keywords.iloc[:,-1]>keywords.mean(axis='columns')*2))]   # & (keywords.iloc[:,-1]) > keywords.iloc[:,-2]
+    a = keywords[((keywords.iloc[:,-1]>25)) & ((keywords.iloc[:,-1]>keywords.mean(axis='columns')*1.5))]   # & (keywords.iloc[:,-1]) > keywords.iloc[:,-2]
   elif len(data[data['Date']==today]) > 700 :
-    a = keywords[((keywords.iloc[:,-1]>20)) & ((keywords.iloc[:,-1]>keywords.mean(axis='columns')*2))]   # & (keywords.iloc[:,-1]) > keywords.iloc[:,-2]
+    a = keywords[((keywords.iloc[:,-1]>20)) & ((keywords.iloc[:,-1]>keywords.mean(axis='columns')*1.5))]   # & (keywords.iloc[:,-1]) > keywords.iloc[:,-2]
   else:
-    a = keywords[((keywords.iloc[:,-1]>15)) & ((keywords.iloc[:,-1]>keywords.mean(axis='columns')*2))]   # & (keywords.iloc[:,-1]) > keywords.iloc[:,-2]
+    a = keywords[((keywords.iloc[:,-1]>15)) & ((keywords.iloc[:,-1]>keywords.mean(axis='columns')*1.5))]   # & (keywords.iloc[:,-1]) > keywords.iloc[:,-2]
   b = a.sort_values(by=[keywords.columns[-1]],ascending=False)
 
   #"일 "로 시작되는 n-gram 삭제

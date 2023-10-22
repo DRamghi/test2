@@ -18,9 +18,9 @@ del data['Unnamed: 0']
 
 now = datetime.now(timezone('Asia/Seoul'))
 today = str(now.date())
-
 start_date = datetime.strptime(today, '%Y-%m-%d')
 end_date = datetime.strptime(today, '%Y-%m-%d')
+
 
 date_data = data[data['Date'].between(start_date, end_date)] 
 

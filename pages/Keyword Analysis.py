@@ -46,7 +46,7 @@ with st.container():
 
 
 #######################################################
-file_path = "test2/full_result.csv" 
+file_path = "/home/ubuntu/test2/full_result.csv" 
 @st.cache_data
 def load_data():
   data = pd.read_csv(file_path)
@@ -116,7 +116,7 @@ if search_word and start_date and end_date != "0":
                 else:
                     neu_count = neu_count + 1
         count_list.append(count)
-        new = {'날짜' : [i, i, i], '논조' : ['긍정', '중립', '부정'], '보도건수' : [pos_count, neu_count, neg_count]}
+        new = {'날짜' : [i, i, i], '논조' : ['총 건수', '긍정', '부정'], '보도건수' : [count, pos_count, neg_count]}
         new = pd.DataFrame(data=new)
         table = pd.concat([table, new])
 
@@ -141,14 +141,14 @@ if search_word and start_date and end_date != "0":
 
 
     ##########불용어 사전#########################
-    stop_words = "이번 담당 여러분 관련 이날 이달 이후 오후 오전 경우 기간 때문 당시 관계자 최근 기준 설명 연합뉴스 예정 증가 가운데 상당 가량 추진 아마 대략 방침 현지시간 지난달 이유 다음"
+    stop_words = "이번 담당 여러분 관련 이날 이달 개월 이후 오후 오전 경우 기간 때문 당시 관계자 최근 기준 설명 연합뉴스 예정 증가 가운데 상당 가량 추진 아마 대략 방침 현지시간 지난달 이유 다음"
     stop_words = set(stop_words.split(' '))
 
 
 
 
 
-    #########특정 키워드 연관어 분석################
+    #########특정 키워드 연관어 분석(테스트(절대적 빈도))################
 
     result_list = date_data.loc[index_list]
     date_list.sort(reverse=False)
@@ -158,10 +158,7 @@ if search_word and start_date and end_date != "0":
 
     keywords_table = pd.DataFrame()
     total_word_list = []
-    keyword_count_list = []
-    period_list = []
-    
-    bigram=[]
+    a = []
 
     n = int(period / 7) + 1
     for i in range(0, int(period / n)):
@@ -169,18 +166,17 @@ if search_word and start_date and end_date != "0":
         if start_day > end_date :
             break
         else:
-            str_start_day = str(start_day)[5:10].replace('-', '.')
+            str_start_day = str(start_day)[5:10].replace('-', '.') + "~"
             end_day = start_date + timedelta(days=n * (i + 1) - 1)
             str_end_day = str(end_day)[5:10].replace('-', '.')
-            period_list.append(int(str(end_day - start_day)[0])+1)
 
-            date_result = result_list[result_list['Date'].between(start_day, end_day)]
+            date_result = result_list[
+                result_list['Date'].between(start_day, end_day)]
 
             if len(date_result) == 0:
                 pass
             else:
                 text = '\n'.join(date_result['Body'])
-                keyword_count_list.append(text.count(search_word))
                 lines = text.split(".")
 
                 # 명사 추출
@@ -200,33 +196,25 @@ if search_word and start_date and end_date != "0":
                 c = Counter(words_list)
 
                 if str_start_day == str_end_day:
-                    first_column = str_end_day
-                else: first_column = f'{str_start_day}~{str_end_day}'
-
-                date_related_words = pd.DataFrame(list(c.items()))
-                date_related_words.columns = ['keyword',first_column]
-                date_related_words[first_column] = date_related_words[first_column]/(text.count(search_word))/(int(str(end_day - start_day)[0])+1)
-                date_related_words = date_related_words.set_index('keyword')
-
-
-
-                keywords_table = pd.concat([keywords_table, date_related_words], axis=1, join='outer')
+                    top_related_words = {"date" : f'{str_end_day}'}
+                else:
+                    top_related_words = {"date" : f'{str_start_day}{str_end_day}'}
+                top_related_words.update(dict(c.most_common(20)))
+                a.append(top_related_words)
 
     if period % n == 0:
         pass
     else:
         plus_day = start_date + timedelta(days=(n * (i + 1)))
-        str_plus_day = str(plus_day)[5:10].replace('-', '.')
+        str_plus_day = str(plus_day)[5:10].replace('-', '.') + "~"
         plus_alpha_day = start_date + timedelta(days=(n * (i + 1)) + period % n -1)
         str_plus_alpha_day = str(plus_alpha_day)[5:10].replace('-', '.')
         date_result = result_list[result_list['Date'].between(plus_day, plus_alpha_day)]
-        period_list.append(int(str(plus_alpha_day - plus_day)[0])+1)
 
         if len(date_result) == 0:
             pass
         else:
             text = '\n'.join(date_result['Body'])
-            keyword_count_list.append(text.count(search_word))
             lines = text.split(".")
 
             # 명사 추출
@@ -242,59 +230,50 @@ if search_word and start_date and end_date != "0":
             #bigram
             for j in range(len(words_list)-1):
                 words_list.append(f"{words_list[j]} {words_list[j+1]}")
-
+            
             c = Counter(words_list)
 
             if str_plus_day == str_plus_alpha_day:
-                last_column = str_plus_alpha_day
+                top_related_words = {"date" : f'{str_plus_alpha_day}'}
             else:
-                last_column = f'{str_plus_day}~{str_plus_alpha_day}'
+                top_related_words = {"date" : f'{str_plus_day}{str_plus_alpha_day}'}
+            top_related_words.update(dict(c.most_common(20)))
+            a.append(top_related_words)
 
-            date_related_words = pd.DataFrame(list(c.items()))
-            date_related_words.columns = ['keyword',last_column]
-            date_related_words[last_column] = date_related_words[last_column]/(text.count(search_word))/(int(str(plus_alpha_day - plus_day)[0])+1)
-            date_related_words = date_related_words.set_index('keyword')
+    most_common_key = []
+    for key in list(a[0])[1:16]:
+        count = 0
+        for i in range(1,len(a)):
+            if key in list(a[i])[1:16]:
+                include = 1
+            else:
+                include = 0
+            count = count + include
+        if count >= len(a)-1:   # 몇개 기간에 포함시 키워드 삭제할지 조정 가능
+            most_common_key.append(key)
 
-            keywords_table = pd.concat([keywords_table, date_related_words], axis=1, join='outer')
+    for i in range(0,len(a)):
+        for key in most_common_key:
+            del a[i][key]
 
-    keywords_table = keywords_table.fillna(0)
+    keywords_table = pd.DataFrame()
+    for col in a:
+        date = col['date']
+        del col['date']
+        b = pd.DataFrame(list(col.items()), columns=[date, "date"])
+        if len(b) >10:
+            b = b[0:10]
+        else:
+            pass
 
-    mean_list = list(keywords_table.mean(axis=1))
+        for i in range(0, len(b)):
+            b.iloc[i, 0] = f'{b.iloc[i, 0]}  :  {b.iloc[i, 1]}건'
+        b.drop(labels='date', axis=1, inplace=True)
+        b.index = b.index + 1
 
-    most_df = pd.DataFrame()
-    for col in range(0, len(keywords_table.columns)):
-        days_dict = {}
-        days_list = []
-        for i in range(0, len(keywords_table)):
-            if keywords_table.iloc[i,col] != 0:
-            #if std_list[i] > (sum(std_list)/len(std_list)):
-                if keywords_table.iloc[i,col] > mean_list[i]*2:
-                    days_dict[keywords_table.index[i]] = int(keywords_table.iloc[i,col]*period_list[col]*keyword_count_list[col])
-        days_dict = sorted(days_dict.items(), key=lambda x: x[1], reverse=True)
-        days_dict = days_dict[0:30]
-
-        #2개 단어가 있는 경우 1개 단어는 삭제
-        short_list = []
-        for i in range(0,len(days_dict)):
-            for j in range(0,len(days_dict)):
-                if j == i:
-                    pass
-                elif days_dict[i][0] in days_dict[j][0] and days_dict[i][1]/2 < days_dict[j][1] :
-                    short_list.append(days_dict[i])
-                    break
-        for short in short_list:
-            days_dict.remove(short)
-
-
-
-        for i in range(0,10):
-            days_list.append(f'{days_dict[i][0]}  :  {days_dict[i][1]}건')
-        
-        days_df = pd.DataFrame(days_list)
-        days_df.columns = [keywords_table.columns[col]]
-        most_df = pd.concat([most_df, days_df], axis=1, join='outer')
-    most_df.index = most_df.index + 1
-
+        keywords_table = pd.concat([keywords_table, b], axis=1, join='outer')
+    
+    most_df = keywords_table
 
 
 
@@ -318,6 +297,7 @@ if search_word and start_date and end_date != "0":
     with st.container():
         st.subheader("2.기간별 연관 이슈 키워드")
         st.dataframe(most_df, use_container_width=True, height = 400)
+        st.write(f"전 기간 상위 연관 키워드 : {most_common_key}")
     st.markdown("""---""")
 
 

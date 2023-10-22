@@ -878,3 +878,200 @@ Traceback (most recent call last):
     from pandas._libs import (
   File "<frozen importlib._bootstrap>", line 398, in parent
 KeyboardInterrupt
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.31.37.193:8501
+  External URL: http://3.37.158.200:8501
+
+2023-10-21 13:38:11.675 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 87, in get
+    entry_bytes = self._read_from_mem_cache(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 137, in _read_from_mem_cache
+    raise CacheStorageKeyNotFoundError("Key not found in mem cache")
+streamlit.runtime.caching.storage.cache_storage_protocol.CacheStorageKeyNotFoundError: Key not found in mem cache
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_data_api.py", line 634, in read_result
+    pickled_entry = self.storage.get(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 89, in get
+    entry_bytes = self._persist_storage.get(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/local_disk_cache_storage.py", line 155, in get
+    raise CacheStorageKeyNotFoundError(
+streamlit.runtime.caching.storage.cache_storage_protocol.CacheStorageKeyNotFoundError: Local disk cache storage is disabled (persist=None)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 263, in _get_or_create_cached_value
+    cached_result = cache.read_result(value_key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_data_api.py", line 636, in read_result
+    raise CacheKeyNotFoundError(str(e)) from e
+streamlit.runtime.caching.cache_errors.CacheKeyNotFoundError: Local disk cache storage is disabled (persist=None)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 87, in get
+    entry_bytes = self._read_from_mem_cache(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 137, in _read_from_mem_cache
+    raise CacheStorageKeyNotFoundError("Key not found in mem cache")
+streamlit.runtime.caching.storage.cache_storage_protocol.CacheStorageKeyNotFoundError: Key not found in mem cache
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_data_api.py", line 634, in read_result
+    pickled_entry = self.storage.get(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 89, in get
+    entry_bytes = self._persist_storage.get(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/local_disk_cache_storage.py", line 155, in get
+    raise CacheStorageKeyNotFoundError(
+streamlit.runtime.caching.storage.cache_storage_protocol.CacheStorageKeyNotFoundError: Local disk cache storage is disabled (persist=None)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 311, in _handle_cache_miss
+    cached_result = cache.read_result(value_key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_data_api.py", line 636, in read_result
+    raise CacheKeyNotFoundError(str(e)) from e
+streamlit.runtime.caching.cache_errors.CacheKeyNotFoundError: Local disk cache storage is disabled (persist=None)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 58, in <module>
+    data = load_data()
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 211, in wrapper
+    return cached_func(*args, **kwargs)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 240, in __call__
+    return self._get_or_create_cached_value(args, kwargs)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 266, in _get_or_create_cached_value
+    return self._handle_cache_miss(cache, value_key, func_args, func_kwargs)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 320, in _handle_cache_miss
+    computed_value = self._info.func(*func_args, **func_kwargs)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 52, in load_data
+    data = pd.read_csv(file_path)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 912, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 577, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1407, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1661, in _make_engine
+    self.handles = get_handle(
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/io/common.py", line 859, in get_handle
+    handle = open(
+FileNotFoundError: [Errno 2] No such file or directory: 'test2/full_result.csv'
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.31.37.193:8502
+  External URL: http://3.37.158.200:8502
+
+
+  A new version of Streamlit is available.
+
+  See what's new at https://discuss.streamlit.io/c/announcements
+
+  Enter the following command to upgrade:
+  $ pip install streamlit --upgrade
+
+2023-10-21 13:39:32.085 Uncaught app exception
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 87, in get
+    entry_bytes = self._read_from_mem_cache(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 137, in _read_from_mem_cache
+    raise CacheStorageKeyNotFoundError("Key not found in mem cache")
+streamlit.runtime.caching.storage.cache_storage_protocol.CacheStorageKeyNotFoundError: Key not found in mem cache
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_data_api.py", line 634, in read_result
+    pickled_entry = self.storage.get(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 89, in get
+    entry_bytes = self._persist_storage.get(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/local_disk_cache_storage.py", line 155, in get
+    raise CacheStorageKeyNotFoundError(
+streamlit.runtime.caching.storage.cache_storage_protocol.CacheStorageKeyNotFoundError: Local disk cache storage is disabled (persist=None)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 263, in _get_or_create_cached_value
+    cached_result = cache.read_result(value_key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_data_api.py", line 636, in read_result
+    raise CacheKeyNotFoundError(str(e)) from e
+streamlit.runtime.caching.cache_errors.CacheKeyNotFoundError: Local disk cache storage is disabled (persist=None)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 87, in get
+    entry_bytes = self._read_from_mem_cache(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 137, in _read_from_mem_cache
+    raise CacheStorageKeyNotFoundError("Key not found in mem cache")
+streamlit.runtime.caching.storage.cache_storage_protocol.CacheStorageKeyNotFoundError: Key not found in mem cache
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_data_api.py", line 634, in read_result
+    pickled_entry = self.storage.get(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/in_memory_cache_storage_wrapper.py", line 89, in get
+    entry_bytes = self._persist_storage.get(key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/storage/local_disk_cache_storage.py", line 155, in get
+    raise CacheStorageKeyNotFoundError(
+streamlit.runtime.caching.storage.cache_storage_protocol.CacheStorageKeyNotFoundError: Local disk cache storage is disabled (persist=None)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 311, in _handle_cache_miss
+    cached_result = cache.read_result(value_key)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_data_api.py", line 636, in read_result
+    raise CacheKeyNotFoundError(str(e)) from e
+streamlit.runtime.caching.cache_errors.CacheKeyNotFoundError: Local disk cache storage is disabled (persist=None)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 552, in _run_script
+    exec(code, module.__dict__)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 58, in <module>
+    data = load_data()
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 211, in wrapper
+    return cached_func(*args, **kwargs)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 240, in __call__
+    return self._get_or_create_cached_value(args, kwargs)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 266, in _get_or_create_cached_value
+    return self._handle_cache_miss(cache, value_key, func_args, func_kwargs)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/streamlit/runtime/caching/cache_utils.py", line 320, in _handle_cache_miss
+    computed_value = self._info.func(*func_args, **func_kwargs)
+  File "/home/ubuntu/test2/pages/Keyword Analysis.py", line 52, in load_data
+    data = pd.read_csv(file_path)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 912, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 577, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1407, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/io/parsers/readers.py", line 1661, in _make_engine
+    self.handles = get_handle(
+  File "/home/ubuntu/.local/lib/python3.9/site-packages/pandas/io/common.py", line 859, in get_handle
+    handle = open(
+FileNotFoundError: [Errno 2] No such file or directory: 'test2/full_result.csv'
+  Stopping...
